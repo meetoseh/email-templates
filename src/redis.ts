@@ -198,6 +198,7 @@ export const discoverMasterUsingSentinels = ({
                 minOtherSentinels,
               }),
             });
+            break;
           }
           if (!foundOneToRun) {
             break;
