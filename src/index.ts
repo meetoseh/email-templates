@@ -193,7 +193,7 @@ async function defaultRequestHandler(req: http.IncomingMessage, res: http.Server
   res.statusCode = 200;
   res.statusMessage = 'OK';
   res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World (with middleware)\n');
+  res.end('Hello World (with middleware) (updated)\n');
 }
 
 main();
