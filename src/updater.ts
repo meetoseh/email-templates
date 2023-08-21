@@ -179,7 +179,7 @@ export function handleUpdates(onReady: () => void): CancelablePromise<void> {
 
       let updaterScript = '/home/ec2-user/update_webapp.sh';
       spawn(`bash ${updaterScript}`, {
-        shell: false,
+        shell: true,
         detached: true,
       });
     }
