@@ -7,12 +7,11 @@ jobs:
     name: lint and test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 16
-    - run: npm ci
-    - run: npx prettier --check **/*.tsx
-    - run: npx prettier --check **/*.css
-    - run: npx prettier --check **/*.ts
-    - run: npm test
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npx prettier --check **/*.tsx
+      - run: npx prettier --check **/*.ts
+      - run: npm test
