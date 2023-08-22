@@ -9,6 +9,16 @@ import { CancelablePromise } from './lib/CancelablePromise';
 import { handleUpdates } from './updater';
 import * as slack from './slack';
 import * as os from 'os';
+import {
+  RootRouter,
+  addRouteToRootRouter,
+  createEmptyRootRouter,
+  useRouterToRoute,
+} from './routers/lib/router';
+import { Callbacks } from './lib/Callbacks';
+import { createCancelablePromiseFromCallbacks } from './lib/createCancelablePromiseFromCallbacks';
+import allRoutes from './routers/router';
+import { createFakeCancelable } from './lib/createFakeCancelable';
 
 async function main() {
   const program = new Command();
@@ -101,9 +111,19 @@ async function main() {
     });
   });
 
-  if (process.env['ENVIRONMENT'] !== 'dev' || true) {
+  if (process.env['ENVIRONMENT'] !== 'dev') {
     slack.sendMessageTo('ops', `email-templates ${os.hostname()} ready`);
   }
+}
+
+function createRouter(): RootRouter {
+  const router = createEmptyRootRouter('');
+  for (const [prefix, routes] of Object.entries(allRoutes)) {
+    for (const route of routes) {
+      addRouteToRootRouter(router, [prefix], route);
+    }
+  }
+  return router;
 }
 
 /**
@@ -121,7 +141,27 @@ function handleRequests({
   cert: Buffer | undefined;
   key: Buffer | undefined;
 }): CancelablePromise<void> {
-  const handleRequest = timeRequestMiddleware.bind(undefined, defaultRequestHandler);
+  const router = createRouter();
+  const rawHandleRequest = timeRequestMiddleware.bind(
+    undefined,
+    routerRequestHandler.bind(undefined, router)
+  );
+  const runningRequests: Record<number, CancelablePromise<void>> = {};
+  let requestCounter = 0;
+
+  const handleRequest = (req: http.IncomingMessage, res: http.ServerResponse) => {
+    const request = rawHandleRequest(req, res);
+    const requestId = requestCounter;
+    requestCounter++;
+    runningRequests[requestId] = request;
+    request.promise
+      .catch((e) => {
+        console.log(`${colorNow()} ${chalk.redBright('Eating top-level request error: ')}`, e);
+      })
+      .finally(() => {
+        delete runningRequests[requestId];
+      });
+  };
 
   let server: http.Server | https.Server;
   if (cert === undefined || key === undefined) {
@@ -141,6 +181,7 @@ function handleRequests({
   }
 
   let done = false;
+  let tentativelyDone = false;
   let resolve: (() => void) | undefined = undefined;
 
   const promise = new Promise<void>((r) => {
@@ -153,9 +194,10 @@ function handleRequests({
   return {
     done: () => done,
     cancel: () => {
-      if (done) {
+      if (tentativelyDone) {
         return;
       }
+      tentativelyDone = true;
       server.close(() => {
         if (!done) {
           done = true;
@@ -163,37 +205,135 @@ function handleRequests({
           resolve?.();
         }
       });
+
+      for (const running of Object.values(runningRequests)) {
+        running.cancel();
+      }
     },
     promise,
   };
 }
 
-async function timeRequestMiddleware(
-  next: (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>,
+function timeRequestMiddleware(
+  next: (req: http.IncomingMessage, res: http.ServerResponse) => CancelablePromise<void>,
   req: http.IncomingMessage,
   res: http.ServerResponse
-) {
-  const requestStartedAt = performance.now();
-  await next(req, res);
-  const requestFinishedAt = performance.now();
+): CancelablePromise<void> {
+  let done = false;
+  let tentativelyDone = false;
+  const cancelers = new Callbacks<undefined>();
 
-  console.info(
-    `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(`${req.url} -> `)}${colorHttpStatus(
-      res.statusCode,
-      res.statusMessage
-    )}${chalk.white(
-      ` in ${(requestFinishedAt - requestStartedAt).toLocaleString(undefined, {
-        maximumFractionDigits: 3,
-      })}ms`
-    )}`
-  );
+  return {
+    done: () => done,
+    cancel: () => {
+      if (!tentativelyDone) {
+        tentativelyDone = true;
+        cancelers.call(undefined);
+      }
+    },
+    promise: new Promise<void>(async (resolve, reject) => {
+      if (tentativelyDone) {
+        reject(new Error('canceled'));
+        return;
+      }
+
+      const canceled = createCancelablePromiseFromCallbacks(cancelers);
+
+      const requestStartedAt = performance.now();
+      const handler = next(req, res);
+      try {
+        await Promise.race([canceled.promise, handler.promise]);
+      } catch (e) {
+        canceled.cancel();
+        handler.cancel();
+
+        if (!tentativelyDone) {
+          if (e instanceof Error) {
+            if (e.message === 'write timeout') {
+              console.info(
+                `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
+                  `${req.url} -> ${chalk.redBright('WRITE TIMEOUT')}`
+                )}`
+              );
+              tentativelyDone = true;
+              resolve();
+              return;
+            } else if (e.message === 'read timeout') {
+              console.info(
+                `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
+                  `${req.url} -> ${chalk.redBright('READ TIMEOUT')}`
+                )}`
+              );
+              tentativelyDone = true;
+              resolve();
+              return;
+            }
+          }
+
+          console.warn(
+            `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
+              `${req.url} -> ${chalk.redBright('ERROR')}`
+            )}`,
+            e
+          );
+          tentativelyDone = true;
+          reject(e);
+          return;
+        }
+      }
+
+      if (tentativelyDone) {
+        console.warn(
+          `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
+            `${req.url} -> ${chalk.redBright('CANCELED')}`
+          )}`
+        );
+        handler.cancel();
+        reject(new Error('canceled'));
+        return;
+      }
+
+      canceled.cancel();
+      const requestFinishedAt = performance.now();
+
+      console.info(
+        `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
+          `${req.url} -> `
+        )}${colorHttpStatus(res.statusCode, res.statusMessage)}${chalk.white(
+          ` in ${(requestFinishedAt - requestStartedAt).toLocaleString(undefined, {
+            maximumFractionDigits: 3,
+          })}ms`
+        )}`
+      );
+      resolve();
+    }).finally(() => {
+      done = true;
+    }),
+  };
+}
+
+function routerRequestHandler(
+  router: RootRouter,
+  req: http.IncomingMessage,
+  res: http.ServerResponse
+): CancelablePromise<void> {
+  if (req.url === undefined || req.method === undefined) {
+    return createFakeCancelable(() => defaultRequestHandler(req, res));
+  }
+
+  const route = useRouterToRoute(router, req.method, req.url);
+  if (route === null) {
+    return createFakeCancelable(() => defaultRequestHandler(req, res));
+  }
+
+  return route.handler(req, res);
 }
 
 async function defaultRequestHandler(req: http.IncomingMessage, res: http.ServerResponse) {
-  res.statusCode = 200;
-  res.statusMessage = 'OK';
+  res.statusCode = 404;
+  res.statusMessage = 'Not Found';
   res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World (with middleware) (v0.0.4)\n');
+  res.end(`Not Found; url=${req.url}\n`);
 }
 
 main();
