@@ -19,6 +19,11 @@ import { Callbacks } from './lib/Callbacks';
 import { createCancelablePromiseFromCallbacks } from './lib/createCancelablePromiseFromCallbacks';
 import allRoutes from './routers/router';
 import { createFakeCancelable } from './lib/createFakeCancelable';
+import {
+  CONTENT_TIMEOUT_MESSAGE,
+  READ_TIMEOUT_MESSAGE,
+  WRITE_TIMEOUT_MESSAGE,
+} from './routers/lib/errors';
 
 async function main() {
   const program = new Command();
@@ -214,6 +219,12 @@ function handleRequests({
   };
 }
 
+const knownSuppressableErrorMessages = {
+  [WRITE_TIMEOUT_MESSAGE]: 'WRITE TIMEOUT',
+  [READ_TIMEOUT_MESSAGE]: 'READ TIMEOUT',
+  [CONTENT_TIMEOUT_MESSAGE]: 'CONTENT TIMEOUT',
+};
+
 function timeRequestMiddleware(
   next: (req: http.IncomingMessage, res: http.ServerResponse) => CancelablePromise<void>,
   req: http.IncomingMessage,
@@ -248,26 +259,19 @@ function timeRequestMiddleware(
         handler.cancel();
 
         if (!tentativelyDone) {
-          if (e instanceof Error) {
-            if (e.message === 'write timeout') {
-              console.info(
-                `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
-                  `${req.url} -> ${chalk.redBright('WRITE TIMEOUT')}`
-                )}`
-              );
-              tentativelyDone = true;
-              resolve();
-              return;
-            } else if (e.message === 'read timeout') {
-              console.info(
-                `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
-                  `${req.url} -> ${chalk.redBright('READ TIMEOUT')}`
-                )}`
-              );
-              tentativelyDone = true;
-              resolve();
-              return;
-            }
+          if (e instanceof Error && e.message in knownSuppressableErrorMessages) {
+            const knownMessage =
+              knownSuppressableErrorMessages[
+                e.message as keyof typeof knownSuppressableErrorMessages
+              ];
+            console.info(
+              `${colorNow()} ${colorHttpMethod(req.method)} ${chalk.white(
+                `${req.url} -> ${chalk.redBright(knownMessage)}`
+              )}`
+            );
+            tentativelyDone = true;
+            resolve();
+            return;
           }
 
           console.warn(

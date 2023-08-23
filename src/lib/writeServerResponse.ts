@@ -3,6 +3,7 @@ import { CancelablePromise } from './CancelablePromise';
 import { Callbacks } from './Callbacks';
 import { createCancelablePromiseFromCallbacks } from './createCancelablePromiseFromCallbacks';
 import { createCancelableTimeout } from './createCancelableTimeout';
+import { WRITE_TIMEOUT_MESSAGE } from '../routers/lib/errors';
 
 /**
  * Writes the given response to the server response in chunks, waiting for each
@@ -72,7 +73,7 @@ export const writeServerResponse = (
         }
 
         if (timeoutPromise.done()) {
-          reject(new Error('write timeout'));
+          reject(new Error(WRITE_TIMEOUT_MESSAGE));
           return;
         }
 
