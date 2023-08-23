@@ -24,11 +24,22 @@ import {
   READ_TIMEOUT_MESSAGE,
   WRITE_TIMEOUT_MESSAGE,
 } from './routers/lib/errors';
+import {
+  RouteWithPrefix,
+  constructOpenapiSchemaRoute,
+  regenerateSchema,
+} from './routers/openapi/routes/schema';
 
 async function main() {
   const program = new Command();
   program.version('0.0.1');
   program
+    .option(
+      '--regenerate-schema',
+      'Regenerate the OpenAPI schema and exit, ignoring other parameters. Does not usually ' +
+        'need to be run manually as we will invoke it automatically when needed.',
+      false
+    )
     .option('-H, --host <hostname>', 'The host to bind to, e.g, 192.168.1.23')
     .option('-p, --port <port>', 'The port to bind to, e.g, 2999')
     .option(
@@ -42,6 +53,14 @@ async function main() {
     .parse();
 
   const options = program.opts();
+
+  if (options.regenerateSchema) {
+    regenerateSchema(flattenRoutes(), {
+      title: 'Oseh Email Templates',
+      version: '1.0.0',
+    });
+    return;
+  }
 
   if (options.host === undefined) {
     console.error('--host is required');
@@ -79,6 +98,8 @@ async function main() {
     ]);
   }
 
+  const router = await createRouter();
+
   let updaterRaw: CancelablePromise<void> | undefined = undefined;
   await new Promise<void>((resolve) => {
     updaterRaw = handleUpdates(resolve);
@@ -89,6 +110,7 @@ async function main() {
   const updater = updaterRaw as CancelablePromise<void>;
 
   const requestHandler = handleRequests({
+    router,
     host: options.host,
     port: portNumber,
     cert,
@@ -121,14 +143,33 @@ async function main() {
   }
 }
 
-function createRouter(): RootRouter {
+async function createRouter(): Promise<RootRouter> {
+  try {
+    fs.mkdirSync('tmp');
+  } catch (e) {}
+
   const router = createEmptyRootRouter('');
+  const globalPrefix = '/api/3';
   for (const [prefix, routes] of Object.entries(allRoutes)) {
     for (const route of routes) {
-      addRouteToRootRouter(router, [prefix], route);
+      addRouteToRootRouter(router, [globalPrefix, prefix], {
+        ...route,
+        handler: await route.handler(),
+      });
     }
   }
+  addRouteToRootRouter(router, [globalPrefix], constructOpenapiSchemaRoute());
   return router;
+}
+
+function flattenRoutes(): RouteWithPrefix[] {
+  const result: RouteWithPrefix[] = [];
+  for (const [prefix, routes] of Object.entries(allRoutes)) {
+    for (const route of routes) {
+      result.push({ prefix, route });
+    }
+  }
+  return result;
 }
 
 /**
@@ -136,17 +177,18 @@ function createRouter(): RootRouter {
  * options, and begins listening for requests. Returns the initialized server.
  */
 function handleRequests({
+  router,
   host,
   port,
   cert,
   key,
 }: {
+  router: RootRouter;
   host: string;
   port: number;
   cert: Buffer | undefined;
   key: Buffer | undefined;
 }): CancelablePromise<void> {
-  const router = createRouter();
   const rawHandleRequest = timeRequestMiddleware.bind(
     undefined,
     routerRequestHandler.bind(undefined, router)

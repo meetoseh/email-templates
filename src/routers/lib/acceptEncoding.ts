@@ -8,6 +8,7 @@ import { createCancelableTimeout } from '../../lib/createCancelableTimeout';
 import { CONTENT_TIMEOUT_MESSAGE, WRITE_TIMEOUT_MESSAGE } from './errors';
 import { writeServerResponse } from '../../lib/writeServerResponse';
 import { RouteBodyArgs } from './RouteBodyArgs';
+import { colorNow } from '../../logging';
 
 export type Coding = {
   identifier: string;
@@ -100,7 +101,12 @@ export const parseAcceptEncoding = (acceptEncodingRaw: string | string[] | undef
   return codings;
 };
 
-const supportedEncodings = {
+/**
+ * The encodings that are supported by the server. The keys are the identifiers
+ * of encodings, and the values are functions that take a stream and return a
+ * stream that encodes the given stream with the encoding.
+ */
+export const supportedEncodings = {
   gzip: (stream: Readable): Readable => {
     return stream.pipe(createGzip());
   },
@@ -119,7 +125,23 @@ const encodingPriority = {
   br: 2,
 };
 
-export const acceptableEncodingsHeader = 'br, gzip, identity';
+/**
+ * The acceptable encodings in no particular order.
+ */
+export const acceptableEncodings: (keyof typeof supportedEncodings)[] = Object.keys(
+  supportedEncodings
+) as (keyof typeof supportedEncodings)[];
+
+/**
+ * The response header value that should be used when rejecting a request due to
+ * an unsupported encoding. Note that the order of the encodings can be meaningful,
+ * which is why this should be used rather than constructing the header value
+ * manually.
+ */
+export const acceptableEncodingsHeader = acceptableEncodings
+  .slice()
+  .sort((a, b) => encodingPriority[b] - encodingPriority[a])
+  .join(', ');
 
 /**
  * Selects the known coding to use, given the codings the client accepts. If the client
@@ -204,6 +226,7 @@ export const streamEncodedServerResponse = (
       const canceled = createCancelablePromiseFromCallbacks(cancelers);
 
       let reading = false;
+      let readingQueued = false;
       let endReached = false;
       let contentTimeoutReached = false;
       let contentTimeout: NodeJS.Timeout | null = setTimeout(onContentTimeout, 5000);
@@ -224,15 +247,27 @@ export const streamEncodedServerResponse = (
         cancelers.call(undefined);
         reject(e);
       });
-      adaptedStream.on('readable', onReadable);
+      adaptedStream.on('readable', () => {
+        onReadable();
+      });
+      adaptedStream.on('data', () => {
+        onReadable();
+      });
       adaptedStream.on('end', () => {
         endReached = true;
         onReadable();
       });
+      adaptedStream.on('close', () => {
+        if (!endReached) {
+          console.log(`${colorNow()} ${coding.identifier} stream closed before end`);
+          endReached = true;
+          onReadable();
+        }
+      });
       if (adaptedStream.readableEnded) {
         endReached = true;
       }
-      if (adaptedStream.readable) {
+      if (adaptedStream.readable || endReached) {
         onReadable();
       }
       return;
@@ -330,18 +365,23 @@ export const streamEncodedServerResponse = (
         }
 
         if (endReached) {
-          handleEnd();
+          await handleEnd();
         }
       }
 
       function onReadable() {
         if (reading) {
+          readingQueued = true;
           return;
         }
 
         reading = true;
         pipeToResponse().finally(() => {
           reading = false;
+          if (!finishing && readingQueued) {
+            readingQueued = false;
+            onReadable();
+          }
         });
       }
 

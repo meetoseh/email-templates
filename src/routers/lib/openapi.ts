@@ -1,10 +1,10 @@
 /**
- * Typing for OpenAPI Version 3.1.0
+ * Typing for OpenAPI Version 3.0.3
  *
  * @see https://swagger.io/specification/
  */
 
-type OASSimpleDataType =
+export type OASSimpleDataType =
   // JSON Basic Types
   | {
       type: 'integer';
@@ -104,11 +104,11 @@ type OASSimpleDataType =
  * Describes the `type: 'object'` option for indicating a datatype, separate
  * from when it might be used for describing an object schema
  */
-type OASObjectTypeHint = {
+export type OASObjectTypeHint = {
   type: 'object';
 };
 
-type OASObjectDataType = OASObjectTypeHint & {
+export type OASObjectDataType = OASObjectTypeHint & {
   /**
    * Which fields are required for this object.
    */
@@ -120,7 +120,7 @@ type OASObjectDataType = OASObjectTypeHint & {
   properties: Record<string, OASSchema>;
 };
 
-type OASContact = {
+export type OASContact = {
   /** The identifying name of the contact person/organization */
   name: string;
   /** The URL pointing to the contact information */
@@ -129,7 +129,7 @@ type OASContact = {
   email: string;
 };
 
-type OASLicense =
+export type OASLicense =
   | {
       /** The license name used for the API */
       name: string;
@@ -146,7 +146,7 @@ type OASLicense =
       url: string;
     };
 
-type OASInfo = {
+export type OASInfo = {
   /** Title of the API */
   title: string;
   /** A short summary of the api */
@@ -166,7 +166,7 @@ type OASInfo = {
   version: string;
 };
 
-type OASServerVariable = {
+export type OASServerVariable = {
   /**
    * An enumeration of string values to be used if the substitution options are
    * from a limited set. Never an empty array
@@ -184,7 +184,7 @@ type OASServerVariable = {
   description: string;
 };
 
-type OASServer = {
+export type OASServer = {
   /**
    * A URL to the target host. This URL supports Server Variables and MAY be
    * relative, to indicate that the host location is relative to the location
@@ -205,7 +205,7 @@ type OASServer = {
   variables: Record<string, OASServerVariable>;
 };
 
-type OASExternalDocumentation = {
+export type OASExternalDocumentation = {
   /**
    * A description of the target documentation, with CommonMark syntax support
    */
@@ -216,10 +216,10 @@ type OASExternalDocumentation = {
   url: string;
 };
 
-type OASDiscriminator = {
+export type OASDiscriminator = {
   /**
    * The name of the property in the payload that will hold the discriminator value,
-   * i.e., the value that can be inspected to determine the type of the payload
+   * i.e., the value that can be inspected to determine the export type of the payload
    */
   propertyName: string;
 
@@ -230,10 +230,10 @@ type OASDiscriminator = {
 };
 
 /**
- * This type is hard to get a good definition of, so only a limited subset
+ * This export type is hard to get a good definition of, so only a limited subset
  * is available.
  */
-type OASBasicSchema = (OASSimpleDataType | OASObjectDataType) & {
+export type OASBasicSchema = (OASSimpleDataType | OASObjectDataType) & {
   /**
    * unsupported; use an OASComplexSchema and specify the discriminator
    * there
@@ -249,7 +249,7 @@ type OASBasicSchema = (OASSimpleDataType | OASObjectDataType) & {
   externalDocs?: OASExternalDocumentation;
 };
 
-type OASComplexSchema =
+export type OASComplexSchema =
   | {
       anyOf: OASSchema[];
       discriminator?: OASDiscriminator;
@@ -262,9 +262,9 @@ type OASComplexSchema =
       discriminator?: OASDiscriminator;
     };
 
-type OASSchema = OASBasicSchema | OASComplexSchema;
+export type OASSchema = OASBasicSchema | OASComplexSchema;
 
-type OASReference = {
+export type OASReference = {
   /**
    * The reference identifier, in the form of a URI
    */
@@ -282,11 +282,11 @@ type OASReference = {
   description?: string;
 };
 
-type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
-type JSONObject = { [key: string]: JSONValue };
-type JSONArray = JSONValue[];
+export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+export type JSONObject = { [key: string]: JSONValue };
+export type JSONArray = JSONValue[];
 
-type OASExample =
+export type OASExample =
   | {
       /**
        * A short description for the example
@@ -320,7 +320,7 @@ type OASExample =
       externalValue: string;
     };
 
-type OASParameter = {
+export type OASParameter = {
   /**
    * The location of the parameter
    */
@@ -378,7 +378,7 @@ type OASParameter = {
    */
   allowReserved?: boolean;
   /**
-   * The schema defining the type of the parameter
+   * The schema defining the export type of the parameter
    */
   schema: OASSchema;
   /**
@@ -392,9 +392,9 @@ type OASParameter = {
   examples?: Record<string, OASExample | OASReference>;
 };
 
-type OASHeader = Omit<OASParameter, 'in' | 'name'>;
+export type OASHeader = Omit<OASParameter, 'in' | 'name'>;
 
-type OASEncoding = Pick<OASParameter, 'style' | 'explode' | 'allowReserved'> & {
+export type OASEncoding = Pick<OASParameter, 'style' | 'explode' | 'allowReserved'> & {
   /**
    * The encoding for a specific property. Default value varies and thus
    * should not be used.
@@ -407,7 +407,7 @@ type OASEncoding = Pick<OASParameter, 'style' | 'explode' | 'allowReserved'> & {
   headers: Record<string, OASHeader | OASReference>;
 };
 
-type OASMediaType = {
+export type OASMediaType = {
   /**
    * The schema defining the content of the request, response, or parameter
    */
@@ -419,7 +419,7 @@ type OASMediaType = {
   example?: undefined;
 
   /**
-   * Examples of the media type, matching the media type and specified
+   * Examples of the media type, matching the media export type and specified
    * schema
    */
   examples?: Record<string, OASExample | OASReference>;
@@ -432,15 +432,15 @@ type OASMediaType = {
   encoding?: Record<string, OASEncoding>;
 };
 
-type OASRequestBody = {
+export type OASRequestBody = {
   /**
    * A brief description of the request body, with CommonMark syntax support
    */
   description?: string;
 
   /**
-   * The content of the request body, where the key is a media type or
-   * media type range (e.g, `application/json` or `image/*`), and the value
+   * The content of the request body, where the key is a media export type or
+   * media export type range (e.g, `application/json` or `image/*`), and the value
    * that describes it. More specific matches are preferred.
    */
   content: Record<string, OASMediaType>;
@@ -450,7 +450,7 @@ type OASRequestBody = {
   required?: boolean;
 };
 
-type OASLink = {
+export type OASLink = {
   operationRef: string;
   operationId: string;
   parameters: Record<string, JSONValue>;
@@ -459,7 +459,7 @@ type OASLink = {
   server: OASServer;
 };
 
-type OASResponse = {
+export type OASResponse = {
   /**
    * A description of the response, with CommonMark syntax support
    */
@@ -473,7 +473,7 @@ type OASResponse = {
 
   /**
    * A map containing descriptions of potential response payloads. The key is a
-   * media type or media type range and the value describes it. For responses
+   * media export type or media export type range and the value describes it. For responses
    * that match multiple keys, only the most specific key is applicable. e.g.
    * text/plain overrides text/*
    */
@@ -486,9 +486,9 @@ type OASResponse = {
   links?: Record<string, OASLink | OASReference>;
 };
 
-type OASResponses = {
+export type OASResponses = {
   /**
-   * The expected response type by http status code. May use the special
+   * The expected response export type by http status code. May use the special
    * key `default` to indicate a default response object for all http codes,
    * but this is not recommended.
    *
@@ -498,7 +498,7 @@ type OASResponses = {
   [httpStatusCodeOrDefault: string]: OASResponse | OASReference;
 };
 
-type OASSecurityScheme = {
+export type OASSecurityScheme = {
   /**
    * The value 'http', indicating this is for the authorization header
    */
@@ -536,14 +536,14 @@ type OASSecurityScheme = {
  * Further, some of them are uselessly vague, e.g., `apiKey` means literally any
  * header with an arbitrary string value. This is not a meaningful distinction.
  */
-type OASSecurityRequirement = {
+export type OASSecurityRequirement = {
   /**
    * Goes to an empty array, indicates that we require the Authorization header.
    */
   http: [];
 };
 
-type OASOperation = {
+export type OASOperation = {
   /**
    * A list of tags for API documentation control. May be used as a logical
    * grouping of operations
@@ -600,7 +600,7 @@ type OASOperation = {
   servers?: OASServer[];
 };
 
-type OASPathItem =
+export type OASPathItem =
   | {
       /**
        * A reference to another path item, as a uri
@@ -659,7 +659,7 @@ type OASPathItem =
       parameters?: (OASParameter | OASReference)[];
     };
 
-type OASPaths = {
+export type OASPaths = {
   /**
    * Maps from a relative path to the corresponding path item. For example:
    * `/foo`. The path must begin with a slash and will be appended without
@@ -671,7 +671,7 @@ type OASPaths = {
   [path: string]: OASPathItem;
 };
 
-type OASComponents = {
+export type OASComponents = {
   /**
    * Can be used to hold reusable schema objects
    */
@@ -714,7 +714,7 @@ type OASComponents = {
   pathItems?: Record<string, OASPathItem>;
 };
 
-type OASTag = {
+export type OASTag = {
   /**
    * The name of the tag
    */
@@ -729,19 +729,15 @@ type OASTag = {
   externalDocs?: OASExternalDocumentation;
 };
 
-type OpenAPI = {
+export type OpenAPI = {
   /**
    * The version of the OpenAPI specification used
    */
-  openapi: '3.1.0';
+  openapi: '3.0.3';
   /**
    * Provides metadata about the API
    */
   info: OASInfo;
-  /**
-   * The default value for the $schema keyword within schema documents
-   */
-  jsonSchemaDialect: 'https://spec.openapis.org/oas/3.1/dialect/base';
   /**
    * The servers that service this API. If empty or not provided, a
    * default server object with a url of `/` is used

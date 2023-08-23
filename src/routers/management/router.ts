@@ -1,6 +1,6 @@
-import { Route } from '../lib/route';
+import { PendingRoute } from '../lib/route';
 import helloWorldRoute from './routes/hello_world';
 
-const routes: Route[] = [helloWorldRoute];
+const routes: PendingRoute[] = [helloWorldRoute];
 
 export default routes;
