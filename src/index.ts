@@ -30,6 +30,11 @@ import {
   regenerateSchema,
 } from './routers/openapi/routes/schema';
 
+/**
+ * Prefix used on all routes
+ */
+const globalPrefix = '/api/3';
+
 async function main() {
   const program = new Command();
   program.version('0.0.1');
@@ -149,7 +154,6 @@ async function createRouter(): Promise<RootRouter> {
   } catch (e) {}
 
   const router = createEmptyRootRouter('');
-  const globalPrefix = '/api/3';
   for (const [prefix, routes] of Object.entries(allRoutes)) {
     for (const route of routes) {
       addRouteToRootRouter(router, [globalPrefix, prefix], {
@@ -166,7 +170,7 @@ function flattenRoutes(): RouteWithPrefix[] {
   const result: RouteWithPrefix[] = [];
   for (const [prefix, routes] of Object.entries(allRoutes)) {
     for (const route of routes) {
-      result.push({ prefix, route });
+      result.push({ prefix: globalPrefix + prefix, route });
     }
   }
   return result;
