@@ -13,7 +13,7 @@ import { createCancelablePromiseFromCallbacks } from '../../lib/createCancelable
  * @returns The route handler.
  */
 export const simpleRouteHandler = (
-  body: (args: RouteBodyArgs) => void
+  body: (args: RouteBodyArgs) => Promise<void>
 ): ((
   routerPrefix: string
 ) => (req: IncomingMessage, resp: ServerResponse) => CancelablePromise<void>) => {
@@ -28,6 +28,14 @@ export const simpleRouteHandler = (
             req,
             resp,
             canceled: createCancelablePromiseFromCallbacks(state.cancelers),
+          }).catch((e) => {
+            if (!state.finishing) {
+              state.finishing = true;
+              resp.statusCode = 500;
+              resp.statusMessage = 'Internal Server Error';
+              resp.end();
+            }
+            reject(e);
           });
         },
       });

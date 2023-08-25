@@ -14,9 +14,5 @@ export const finishWithServiceUnavailable = (
   args.resp.statusMessage = 'Service Unavailable';
   args.resp.setHeader('Vary', 'Accept-Encoding');
   args.resp.setHeader('Retry-After', opts.retryAfterSeconds.toString());
-  return finishWithEncodedServerResponse(
-    args,
-    { identifier: 'identity', quality: 1 },
-    Readable.from(Buffer.from(''))
-  );
+  return finishWithEncodedServerResponse(args, 'identity', Readable.from(Buffer.from('')));
 };

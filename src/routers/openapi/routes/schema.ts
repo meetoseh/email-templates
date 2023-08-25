@@ -56,13 +56,13 @@ export const constructOpenapiSchemaRoute = (): Route => {
         return finishWithBadEncoding(args);
       }
 
-      if (!fs.existsSync(pathToEncoding(coding.identifier))) {
+      if (!fs.existsSync(pathToEncoding(coding))) {
         return finishWithServiceUnavailable(args, { retryAfterSeconds: 5 });
       }
 
       let responseStream;
       try {
-        responseStream = fs.createReadStream(pathToEncoding(coding.identifier), {
+        responseStream = fs.createReadStream(pathToEncoding(coding), {
           autoClose: true,
         });
       } catch (e) {
@@ -72,13 +72,9 @@ export const constructOpenapiSchemaRoute = (): Route => {
       args.resp.statusCode = 200;
       args.resp.statusMessage = 'OK';
       args.resp.setHeader('Vary', 'Accept-Encoding');
-      args.resp.setHeader('Content-Encoding', coding.identifier);
+      args.resp.setHeader('Content-Encoding', coding);
       args.resp.setHeader('Content-Type', 'application/json; charset=utf-8');
-      return finishWithEncodedServerResponse(
-        args,
-        { identifier: 'identity', quality: 1 },
-        responseStream
-      );
+      return finishWithEncodedServerResponse(args, 'identity', responseStream);
     }),
     docs: [],
   };

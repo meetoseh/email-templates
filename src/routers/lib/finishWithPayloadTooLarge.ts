@@ -4,15 +4,12 @@ import { acceptableEncodingsHeader, finishWithEncodedServerResponse } from './ac
 
 /**
  * Writes the appropriate response to the given request given that
- * the accept-encoding header indicated no acceptable supported encodings,
- * or that the given content-encoding was not supported.
+ * the provided payload, either by inspection or via the content-length
+ * header, is too large.
  */
-export const finishWithBadEncoding = (args: RouteBodyArgs) => {
-  // status code is explicitly defined in RFC 9110
-  // https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-encoding
-  // https://www.rfc-editor.org/rfc/rfc9110#status.415
-  args.resp.statusCode = 415;
-  args.resp.statusMessage = 'Unsupported Media Type';
+export const finishWithPayloadTooLarge = (args: RouteBodyArgs) => {
+  args.resp.statusCode = 413;
+  args.resp.statusMessage = 'Payload Too Large';
   args.resp.setHeader('Vary', 'Accept-Encoding');
   args.resp.setHeader('Accept-Encoding', acceptableEncodingsHeader);
   return finishWithEncodedServerResponse(args, 'identity', Readable.from(Buffer.from('')));

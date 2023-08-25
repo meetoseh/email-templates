@@ -21,6 +21,7 @@ import allRoutes from './routers/router';
 import { createFakeCancelable } from './lib/createFakeCancelable';
 import {
   CONTENT_TIMEOUT_MESSAGE,
+  DECOMPRESS_TIMEOUT_MESSAGE,
   READ_TIMEOUT_MESSAGE,
   WRITE_TIMEOUT_MESSAGE,
 } from './routers/lib/errors';
@@ -269,6 +270,7 @@ const knownSuppressableErrorMessages = {
   [WRITE_TIMEOUT_MESSAGE]: 'WRITE TIMEOUT',
   [READ_TIMEOUT_MESSAGE]: 'READ TIMEOUT',
   [CONTENT_TIMEOUT_MESSAGE]: 'CONTENT TIMEOUT',
+  [DECOMPRESS_TIMEOUT_MESSAGE]: 'DECOMPRESS TIMEOUT',
 };
 
 function timeRequestMiddleware(

@@ -62,30 +62,21 @@ test('acceptable and unacceptable', () => {
 });
 
 test('select simple', () => {
-  expect(selectEncoding(parseAcceptEncoding('gzip'))).toEqual({ identifier: 'gzip', quality: 1 });
+  expect(selectEncoding(parseAcceptEncoding('gzip'))).toEqual('gzip');
 });
 
 test('select from catchall', () => {
-  expect(selectEncoding(parseAcceptEncoding('*'))).toEqual({ identifier: 'br', quality: 1 });
+  expect(selectEncoding(parseAcceptEncoding('*'))).toEqual('br');
 });
 
 test('select with quality', () => {
-  expect(selectEncoding(parseAcceptEncoding('identity;q=0.5, gzip;q=0.75'))).toEqual({
-    identifier: 'gzip',
-    quality: 0.75,
-  });
+  expect(selectEncoding(parseAcceptEncoding('identity;q=0.5, gzip;q=0.75'))).toEqual('gzip');
 });
 
 test('select with unacceptable', () => {
-  expect(selectEncoding(parseAcceptEncoding('*;q=0.5, br;q=0'))).toEqual({
-    identifier: 'gzip',
-    quality: 0.5,
-  });
+  expect(selectEncoding(parseAcceptEncoding('*;q=0.5, br;q=0'))).toEqual('gzip');
 });
 
 test('select with unacceptable catchall', () => {
-  expect(selectEncoding(parseAcceptEncoding('*;q=0, identity'))).toEqual({
-    identifier: 'identity',
-    quality: 1,
-  });
+  expect(selectEncoding(parseAcceptEncoding('*;q=0, identity'))).toEqual('identity');
 });

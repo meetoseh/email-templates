@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { CancelablePromise } from '../../lib/CancelablePromise';
 import { simpleRouteHandler } from './simpleRouteHandler';
 import {
+  AcceptableEncoding,
   acceptableEncodings,
   finishWithEncodedServerResponse,
   parseAcceptEncoding,
@@ -45,7 +46,7 @@ export const staticRouteHandler = async (
     }
     let responseStream;
     try {
-      responseStream = fs.createReadStream(`tmp/${cacheKey}.${coding.identifier}`, {
+      responseStream = fs.createReadStream(`tmp/${cacheKey}.${coding}`, {
         autoClose: true,
       });
     } catch (e) {
@@ -55,17 +56,13 @@ export const staticRouteHandler = async (
     args.resp.statusCode = 200;
     args.resp.statusMessage = 'OK';
     args.resp.setHeader('Vary', 'Accept-Encoding');
-    args.resp.setHeader('Content-Encoding', coding.identifier);
+    args.resp.setHeader('Content-Encoding', coding);
     args.resp.setHeader('Content-Type', options.contentType);
     args.resp.setHeader(
       'Cache-Control',
       'public, max-age=2, stale-while-revalidate=10, stale-if-error=86400'
     );
-    return finishWithEncodedServerResponse(
-      args,
-      { identifier: 'identity', quality: 1 },
-      responseStream
-    );
+    return finishWithEncodedServerResponse(args, 'identity', responseStream);
   });
 };
 
@@ -76,11 +73,7 @@ export const staticRouteHandler = async (
  * @param outpath The path to the file to write the compressed file to.
  * @param encoding The encoding to use.
  */
-const compress = async (
-  inpath: string,
-  outpath: string,
-  encoding: keyof typeof supportedEncodings
-) => {
+const compress = async (inpath: string, outpath: string, encoding: AcceptableEncoding) => {
   try {
     fs.unlinkSync(outpath);
   } catch (e) {}

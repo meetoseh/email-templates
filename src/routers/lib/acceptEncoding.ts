@@ -3,12 +3,14 @@ import { Readable } from 'stream';
 import { CancelablePromise } from '../../lib/CancelablePromise';
 import { Callbacks } from '../../lib/Callbacks';
 import { createCancelablePromiseFromCallbacks } from '../../lib/createCancelablePromiseFromCallbacks';
-import { createGzip, createBrotliCompress } from 'zlib';
+import { createGzip, createBrotliCompress, createGunzip, createBrotliDecompress } from 'zlib';
 import { createCancelableTimeout } from '../../lib/createCancelableTimeout';
 import { CONTENT_TIMEOUT_MESSAGE, WRITE_TIMEOUT_MESSAGE } from './errors';
 import { writeServerResponse } from '../../lib/writeServerResponse';
 import { RouteBodyArgs } from './RouteBodyArgs';
 import { colorNow } from '../../logging';
+import * as httpSemantics from './httpSemantics';
+import { BufferPeekableStream } from './peekableStream';
 
 export type Coding = {
   identifier: string;
@@ -16,36 +18,9 @@ export type Coding = {
 };
 
 export type KnownCoding = {
-  identifier: keyof typeof supportedEncodings;
+  identifier: AcceptableEncoding;
   quality: number;
 };
-
-// We are parsing:
-//
-// Accept-Encoding = [ ( codings [ weight ] ) * ( OWS "," OWS ( codings [ weight ] ) ) ]
-// codings = content-coding / "identity" / "*"
-// content-coding = token
-// token = 1*tchar
-// tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
-// weight = OWS ";" OWS "q=" qvalue
-// qvalue = ( "0" [ "." *3DIGIT ] ) / ( "1" [ "." *3"0" ] )
-// OWS = optional white space
-
-const tcharRegex = /[!#$%&'*+\-.^_`|~0-9a-zA-Z]/;
-const tokenRegex = new RegExp(`${tcharRegex.source}+`);
-const contentCodingRegex = tokenRegex;
-const codingsRegex = new RegExp(`(?:${contentCodingRegex.source}|identity|\\*)`);
-const optionalWhitespaceRegex = /\s*/;
-const qvalueRegex = new RegExp(`(?:0(?:\\.[0-9]{0,3})?|1(?:\\.0{0,3})?)`);
-const weightRegex = new RegExp(
-  `(?:${optionalWhitespaceRegex.source};${optionalWhitespaceRegex.source}q=${qvalueRegex.source})?`
-);
-const codingsWithOptionalWeightRegex = new RegExp(
-  `(?:${codingsRegex.source}${weightRegex.source}?)`
-);
-const acceptEncodingRegex = new RegExp(
-  `^(?:${codingsWithOptionalWeightRegex.source}(?:${optionalWhitespaceRegex.source},${optionalWhitespaceRegex.source}${codingsWithOptionalWeightRegex.source})*)?$`
-);
 
 /**
  * Parses the given Accept-Encoding header into the codings it contains. If multiple
@@ -83,22 +58,19 @@ export const parseAcceptEncoding = (acceptEncodingRaw: string | string[] | undef
     return [{ identifier: 'identity', quality: 1 }];
   }
 
-  if (!acceptEncodingRegex.test(acceptEncoding)) {
+  let parsedAcceptEncoding;
+  try {
+    parsedAcceptEncoding = httpSemantics.parseAcceptEncoding(
+      new BufferPeekableStream(Buffer.from(acceptEncoding, 'utf8'))
+    );
+  } catch (e) {
     return [{ identifier: 'identity', quality: 1 }];
   }
 
-  const codings: Coding[] = [];
-  const codingsRaw = acceptEncoding.split(',');
-  for (const codingRaw of codingsRaw) {
-    const codingAndQuality = codingRaw.split(';');
-    const coding = codingAndQuality[0].trim();
-    const quality =
-      codingAndQuality[1] !== undefined
-        ? parseFloat(codingAndQuality[1].split('=')[1].trim())
-        : undefined;
-    codings.push({ identifier: coding, quality: quality ?? 1 });
-  }
-  return codings;
+  return parsedAcceptEncoding.map((raw) => ({
+    identifier: raw.codings,
+    quality: raw.weight ? parseFloat(raw.weight) : 1,
+  }));
 };
 
 /**
@@ -118,6 +90,22 @@ export const supportedEncodings = {
   },
 };
 
+export const supportedEncodingDecompressors = {
+  gzip: (stream: Readable): Readable => {
+    return stream.pipe(createGunzip());
+  },
+  br: (stream: Readable): Readable => {
+    return stream.pipe(createBrotliDecompress());
+  },
+  identity: (stream: Readable): Readable => {
+    return stream;
+  },
+};
+/**
+ * The encodings which we accept from the client and might return.
+ */
+export type AcceptableEncoding = keyof typeof supportedEncodings;
+
 // used to break ties when multiple codings have the same quality
 const encodingPriority = {
   identity: 0,
@@ -128,9 +116,9 @@ const encodingPriority = {
 /**
  * The acceptable encodings in no particular order.
  */
-export const acceptableEncodings: (keyof typeof supportedEncodings)[] = Object.keys(
+export const acceptableEncodings: AcceptableEncoding[] = Object.keys(
   supportedEncodings
-) as (keyof typeof supportedEncodings)[];
+) as AcceptableEncoding[];
 
 /**
  * The response header value that should be used when rejecting a request due to
@@ -150,7 +138,7 @@ export const acceptableEncodingsHeader = acceptableEncodings
  * @param codings The codings the client accepts, with preference information
  * @returns The coding to use, or null if no known coding is acceptable
  */
-export const selectEncoding = (codings: Coding[]): null | KnownCoding => {
+export const selectEncoding = (codings: Coding[]): null | AcceptableEncoding => {
   const knownCodings = codings.filter(
     (coding) => coding.identifier in supportedEncodings
   ) as KnownCoding[];
@@ -160,7 +148,7 @@ export const selectEncoding = (codings: Coding[]): null | KnownCoding => {
     if (catchall !== undefined) {
       const givenLookup = new Set(knownCodings.map((coding) => coding.identifier));
       for (const identRaw in supportedEncodings) {
-        const identifier = identRaw as keyof typeof supportedEncodings;
+        const identifier = identRaw as AcceptableEncoding;
         if (!givenLookup.has(identifier)) {
           knownCodings.push({ identifier: identifier, quality: catchall.quality });
         }
@@ -183,7 +171,7 @@ export const selectEncoding = (codings: Coding[]): null | KnownCoding => {
     return null;
   }
 
-  return sortedCodings[0];
+  return sortedCodings[0].identifier;
 };
 
 /**
@@ -201,7 +189,7 @@ export const selectEncoding = (codings: Coding[]): null | KnownCoding => {
  */
 export const streamEncodedServerResponse = (
   resp: ServerResponse,
-  coding: KnownCoding,
+  coding: AcceptableEncoding,
   stream: Readable
 ): CancelablePromise<void> => {
   let done = false;
@@ -236,7 +224,7 @@ export const streamEncodedServerResponse = (
           contentTimeout = null;
         }
       });
-      const adaptedStream = supportedEncodings[coding.identifier](stream);
+      const adaptedStream = supportedEncodings[coding](stream);
 
       adaptedStream.on('error', (e) => {
         if (finishing) {
@@ -250,16 +238,13 @@ export const streamEncodedServerResponse = (
       adaptedStream.on('readable', () => {
         onReadable();
       });
-      adaptedStream.on('data', () => {
-        onReadable();
-      });
       adaptedStream.on('end', () => {
         endReached = true;
         onReadable();
       });
       adaptedStream.on('close', () => {
         if (!endReached) {
-          console.log(`${colorNow()} ${coding.identifier} stream closed before end`);
+          console.log(`${colorNow()} ${coding} stream closed before end`);
           endReached = true;
           onReadable();
         }
@@ -408,11 +393,17 @@ export const streamEncodedServerResponse = (
  * @param args The route body args
  * @param coding The coding to use
  * @param stream The paused stream to use to send the response body
+ * @param error If specified, instead of resolving when done, we reject with
+ *   this error. Used primarily for indicating a timeout was the issue in
+ *   the logs. Only used if we were able to write the response, otherwise
+ *   the error is ignored in favor of the error that caused the response
+ *   not to be written.
  */
 export const finishWithEncodedServerResponse = async (
   args: RouteBodyArgs,
-  coding: KnownCoding,
-  stream: Readable
+  coding: AcceptableEncoding,
+  stream: Readable,
+  error?: Error
 ) => {
   if (args.state.finishing) {
     return;
@@ -440,5 +431,9 @@ export const finishWithEncodedServerResponse = async (
 
   args.state.finishing = true;
   args.state.cancelers.call(undefined);
-  args.resolve();
+  if (error === undefined) {
+    args.resolve();
+  } else {
+    args.reject(error);
+  }
 };
