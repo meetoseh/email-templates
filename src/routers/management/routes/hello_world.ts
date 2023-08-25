@@ -88,7 +88,7 @@ const helloWorldRoute: PendingRoute = {
             '200': {
               description: 'OK',
               content: {
-                'application/json': {
+                'application/json; charset=utf-8': {
                   schema: {
                     type: 'object',
                     required: ['message'],
@@ -118,12 +118,22 @@ const helloWorldRoute: PendingRoute = {
           summary: 'Example POST route',
           description:
             'This route can be used to test your ability to submit a request body to the server, ' +
-            'usually for testing e.g., what encodings you can send in a request body.',
+            'usually for testing e.g., what encodings you can send in a request body.\n\n```bash\n' +
+            '$ echo \'{"message":"look at this nifty double compressed request"}\' \\\n' +
+            '  | gzip \\\n' +
+            '  | curl https://oseh.io/api/3/management/hello_world \\\n' +
+            '    -H "Content-Type: application/json; charset=utf8" \\\n' +
+            '    -H "Content-Encoding: gzip" \\\n' +
+            '    -H "Accept-Encoding: gzip" \\\n' +
+            '    --data-binary @- --silent \\\n' +
+            '  | gunzip\n' +
+            '{"pong":"look at this nifty double compressed request"}\n' +
+            '```',
           operationId: 'management_helloWorldPost',
           requestBody: {
             description: 'The message to send back to the client',
             content: {
-              'application/json': {
+              'application/json; charset=utf-8': {
                 schema: {
                   type: 'object',
                   required: ['message'],
@@ -150,7 +160,7 @@ const helloWorldRoute: PendingRoute = {
             '200': {
               description: 'OK',
               content: {
-                'application/json': {
+                'application/json; charset=utf-8': {
                   schema: {
                     type: 'object',
                     required: ['pong'],
@@ -181,7 +191,7 @@ const helloWorldRoute: PendingRoute = {
               summary: 'Unprocessable Entity',
               description: 'Request body does not match schema',
               content: {
-                'application/json': {
+                'application/json; charset=utf-8': {
                   schema: {
                     type: 'object',
                     required: ['error'],
