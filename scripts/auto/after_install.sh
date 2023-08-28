@@ -37,4 +37,4 @@ activate_node_installing_if_necessary() {
 
 install_basic_dependencies
 activate_node_installing_if_necessary
-npm install
+npm ci
