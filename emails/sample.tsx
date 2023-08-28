@@ -4,7 +4,20 @@ import { simpleEmailRoute } from '../src/routers/email/lib/simpleEmailRoute';
 import s from '../src/routers/lib/schemaHelpers';
 import * as React from 'react';
 
-const { Body, Container, Head, Html, Preview, Text, render } = components;
+// I wish there was a more compact way to make this work both when compiling
+// with commonjs (as with npm run preview) and with ECM modules (as with the
+// standard run process)
+let { Body, Container, Head, Html, Preview, Text, render } = components;
+if (Body === undefined) {
+  let comps = (components as any).default;
+  Body = comps.Body;
+  Container = comps.Container;
+  Head = comps.Head;
+  Html = comps.Html;
+  Preview = comps.Preview;
+  Text = comps.Text;
+  render = comps.render;
+}
 
 export type SampleProps = {
   name: string;

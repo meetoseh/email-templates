@@ -147,6 +147,25 @@ const combineRoutesToSchema = (routes: RouteWithPrefix[], info: OASInfo): OpenAP
     openapi: '3.0.3',
     info,
     paths,
+    tags: [
+      {
+        name: 'templates',
+        description: 'Email templates. The JWT `sub` should be the slug of the template.',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        jwt: {
+          type: 'http',
+          description:
+            'A JWT signed with the oseh email template secret. Must have:\n' +
+            '- iss `oseh`\n- aud `oseh-email-templates`\n- exp\n- iat\n- ' +
+            'jti\n- sub (varies by tag)\n- additional claims (varies by tag)',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   };
 };
 

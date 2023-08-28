@@ -382,7 +382,7 @@ export type OASParameter = {
    * this should be `form`, for path and headers it should be `simple`. In
    * practice there is limited support for any other value.
    */
-  style: 'form' | 'simple';
+  style?: 'form' | 'simple';
   /**
    * Whether array or objects generate separate parameters for each value of
    * the array or key-value pair of the object. Other types are not affected.
@@ -400,7 +400,7 @@ export type OASParameter = {
   /**
    * The schema defining the export type of the parameter
    */
-  schema: OASSchema;
+  schema?: OASSchema;
   /**
    * unsupported, prefer examples
    */
@@ -412,7 +412,12 @@ export type OASParameter = {
   examples?: Record<string, OASExample | OASReference>;
 };
 
-export type OASHeader = Omit<OASParameter, 'in' | 'name'>;
+/**
+ * According to the specification document, headers should not include `in`
+ * or `name` when specified via the components object, but in practice it
+ * will not render correctly within the swagger ui unless they are included.
+ */
+export type OASHeader = OASParameter;
 
 export type OASEncoding = Pick<OASParameter, 'style' | 'explode' | 'allowReserved'> & {
   /**
@@ -544,23 +549,15 @@ export type OASSecurityScheme = {
 };
 
 /**
- * A security requirement for an endpoint. We only include the minimum support
- * required to display the Authorization header, because the spec prevents us
- * from just treating it like an normal header. This is despite no benefit being
- * gained from this additional complexity, as none of the options they support
- * (e.g., oauth) have meaningfully consistent implementations in the wild, thus
- * each one will need to be described separately anyway (e.g., Google's oauth
- * flow is not compatible with Apple's oauth flow, which is not compatible with
- * Microsofts oauth flow, which won't be compatible with our oauth flow, etc.).
- *
- * Further, some of them are uselessly vague, e.g., `apiKey` means literally any
- * header with an arbitrary string value. This is not a meaningful distinction.
+ * A security requirement for an endpoint.
  */
 export type OASSecurityRequirement = {
   /**
    * Goes to an empty array, indicates that we require the Authorization header.
+   * If the array isn't empty, then the type of the corresponding scheme must
+   * be `oauth2` or `openIdConnect` and the values are the scopes required.
    */
-  http: [];
+  [name: string]: string[];
 };
 
 export type OASOperation = {
@@ -719,7 +716,7 @@ export type OASComponents = {
   /**
    * Can be used to hold reusable security scheme objects
    */
-  securitySchemas?: Record<string, OASSecurityScheme>;
+  securitySchemes?: Record<string, OASSecurityScheme>;
   /**
    * unsupported, may pose a security risk
    */

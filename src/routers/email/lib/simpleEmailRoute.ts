@@ -15,6 +15,7 @@ import { finishWithNotAcceptable } from '../../lib/finishWithNotAcceptable';
 import { loadBodyJson } from '../../lib/loadBodyJson';
 import { STANDARD_VARY_RESPONSE } from '../../lib/constants';
 import { Readable } from 'stream';
+import { JWTPayload, jwtVerify } from 'jose';
 
 export type SimpleEmailRouteArgs<T extends object> = Omit<EmailRoute, 'handler' | 'schema'> & {
   /**
@@ -83,7 +84,73 @@ export const simpleEmailRoute = <T extends object>(
           return await finishWithNotAcceptable(args, acceptable);
         }
 
-        // TODO: Verify authorization
+        const authorization = args.req.headers.authorization;
+        if (authorization === undefined || !authorization.startsWith('Bearer ')) {
+          args.resp.statusCode = 401;
+          args.resp.statusMessage = 'Unauthorized';
+          args.resp.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          args.resp.setHeader('Content-Encoding', coding);
+          args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
+          return finishWithEncodedServerResponse(
+            args,
+            coding,
+            Readable.from(
+              Buffer.from(
+                'Unauthorized: provide an Authorization header in the form "Bearer {jwt}"',
+                'utf-8'
+              )
+            )
+          );
+        }
+
+        const token = authorization.slice('Bearer '.length);
+        let payload: JWTPayload;
+        try {
+          const verified = await jwtVerify(
+            token,
+            Buffer.from(process.env.OSEH_EMAIL_TEMPLATE_JWT_SECRET!, 'utf-8'),
+            {
+              issuer: 'oseh',
+              audience: 'oseh-email-templates',
+              algorithms: ['HS256'],
+              requiredClaims: ['iss', 'aud', 'iat', 'exp', 'jti', 'sub'],
+            }
+          );
+          payload = verified.payload;
+        } catch (e) {
+          args.resp.statusCode = 403;
+          args.resp.statusMessage = 'Forbidden';
+          args.resp.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          args.resp.setHeader('Content-Encoding', coding);
+          args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
+          return finishWithEncodedServerResponse(
+            args,
+            coding,
+            Readable.from(
+              Buffer.from(
+                'Token was not understood, not signed correctly, or missing required claims',
+                'utf-8'
+              )
+            )
+          );
+        }
+
+        if (args.state.finishing) {
+          return;
+        }
+
+        if (payload.sub !== routeArgs.slug) {
+          args.resp.statusCode = 403;
+          args.resp.statusMessage = 'Forbidden';
+          args.resp.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          args.resp.setHeader('Content-Encoding', coding);
+          args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
+          return finishWithEncodedServerResponse(
+            args,
+            coding,
+            Readable.from(Buffer.from('Token sub does not match route slug', 'utf-8'))
+          );
+        }
 
         const bodyJson = await loadBodyJson(args, {});
         if (args.state.finishing) {
