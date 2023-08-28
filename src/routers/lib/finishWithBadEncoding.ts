@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import { RouteBodyArgs } from './RouteBodyArgs';
 import { acceptableEncodingsHeader, finishWithEncodedServerResponse } from './acceptEncoding';
+import { STANDARD_VARY_RESPONSE } from './constants';
 
 /**
  * Writes the appropriate response to the given request given that
@@ -13,7 +14,7 @@ export const finishWithBadEncoding = (args: RouteBodyArgs) => {
   // https://www.rfc-editor.org/rfc/rfc9110#status.415
   args.resp.statusCode = 415;
   args.resp.statusMessage = 'Unsupported Media Type';
-  args.resp.setHeader('Vary', 'Accept-Encoding');
+  args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
   args.resp.setHeader('Accept-Encoding', acceptableEncodingsHeader);
   return finishWithEncodedServerResponse(args, 'identity', Readable.from(Buffer.from('')));
 };

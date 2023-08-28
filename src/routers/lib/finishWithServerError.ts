@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import { RouteBodyArgs } from './RouteBodyArgs';
 import { acceptableEncodingsHeader, finishWithEncodedServerResponse } from './acceptEncoding';
+import { STANDARD_VARY_RESPONSE } from './constants';
 
 /**
  * Writes a generic 500 internal server error response to the given request. This
@@ -16,7 +17,7 @@ import { acceptableEncodingsHeader, finishWithEncodedServerResponse } from './ac
 export const finishWithServerError = (args: RouteBodyArgs, error?: Error) => {
   args.resp.statusCode = 500;
   args.resp.statusMessage = 'Internal Server Error';
-  args.resp.setHeader('Vary', 'Accept-Encoding');
+  args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
   args.resp.setHeader('Accept-Encoding', acceptableEncodingsHeader);
   return finishWithEncodedServerResponse(args, 'identity', Readable.from(Buffer.from('')), error);
 };

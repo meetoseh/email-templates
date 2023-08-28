@@ -491,3 +491,52 @@ export const parseAcceptEncoding = (
     parseOptionalWhiteSpace(stream);
   }
 };
+
+/**
+ * Parses a media-range, e.g., `text/html; charset=utf-8`.
+ * NOTE: since * is a valid token, this is the same as parseMediaType
+ */
+export const parseMediaRange = parseMediaType;
+
+type MediaRangeWithWeight = {
+  type: string;
+  subtype: string;
+  parameters: [string, string][];
+  weight?: string;
+};
+
+const weightRegex = /^(0(\.\d{0,3})?|1(\.0{0,3})?)$/;
+/**
+ * Parses an Accept header, e.g.,
+ * `text/html; charset=utf-8, text/plain; charset=utf-8; q=0.8, text/plain; q=0.3, text/*; q=0.1`
+ */
+export const parseAccept = (stream: PeekableStream): MediaRangeWithWeight[] => {
+  const result: MediaRangeWithWeight[] = [];
+
+  while (true) {
+    const mediaRange: MediaRangeWithWeight = parseMediaRange(stream);
+    for (let i = mediaRange.parameters.length - 1; i >= 0; i--) {
+      const [k, v] = mediaRange.parameters[i];
+      if (k === 'q') {
+        if (!weightRegex.test(v)) {
+          throw new Error(`invalid weight near ${stream.tell()}`);
+        }
+
+        mediaRange.parameters.splice(i, 1);
+        if (mediaRange.weight === undefined) {
+          mediaRange.weight = v;
+        }
+        break;
+      }
+    }
+
+    result.push(mediaRange);
+    if (stream.remaining === 0) {
+      return result;
+    }
+
+    parseOptionalWhiteSpace(stream);
+    parseCodePoint(stream, 44);
+    parseOptionalWhiteSpace(stream);
+  }
+};

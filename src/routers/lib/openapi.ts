@@ -26,7 +26,19 @@ export type OASSimpleDataType =
       /** true or false */
       format: 'boolean';
     }
-  // JSON Format Extensions included by reference
+  // https://swagger.io/specification/v3/ but not JSON Schema
+  | {
+      type: 'string';
+      /* base64 encoded characters */
+      format: 'byte';
+    }
+  | {
+      type: 'string';
+      /* any sequence of octets */
+      format: 'binary';
+    }
+  // JSON Format Extensions included by reference in 3.1, either specifed in 3.0
+  // or omitted (and thus allowed but unsupported by the ui viewer)
   // https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3.1
   | {
       type: 'string';
@@ -108,6 +120,10 @@ export type OASObjectTypeHint = {
   type: 'object';
 };
 
+export type OASArrayTypeHint = {
+  type: 'array';
+};
+
 export type OASObjectDataType = OASObjectTypeHint & {
   /**
    * Which fields are required for this object.
@@ -118,6 +134,10 @@ export type OASObjectDataType = OASObjectTypeHint & {
    * A map of property names to their schemas.
    */
   properties: Record<string, OASSchema>;
+};
+
+export type OASArrayDataType = OASArrayTypeHint & {
+  items: OASSchema;
 };
 
 export type OASContact = {
@@ -233,7 +253,7 @@ export type OASDiscriminator = {
  * This export type is hard to get a good definition of, so only a limited subset
  * is available.
  */
-export type OASBasicSchema = (OASSimpleDataType | OASObjectDataType) & {
+export type OASBasicSchema = (OASSimpleDataType | OASObjectDataType | OASArrayDataType) & {
   /**
    * unsupported; use an OASComplexSchema and specify the discriminator
    * there

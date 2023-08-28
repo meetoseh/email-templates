@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import { RouteBodyArgs } from './RouteBodyArgs';
 import { acceptableEncodingsHeader, finishWithEncodedServerResponse } from './acceptEncoding';
+import { STANDARD_VARY_RESPONSE } from './constants';
 
 /**
  * Writes a 400 bad request response to the given request. This should be used
@@ -15,7 +16,7 @@ import { acceptableEncodingsHeader, finishWithEncodedServerResponse } from './ac
 export const finishWithMissingCharsetHint = (args: RouteBodyArgs) => {
   args.resp.statusCode = 400;
   args.resp.statusMessage = 'Bad Request';
-  args.resp.setHeader('Vary', 'Accept-Encoding');
+  args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
   args.resp.setHeader('Accept-Encoding', acceptableEncodingsHeader);
   args.resp.setHeader('Content-Type', 'text/plain; charset=utf-8');
   return finishWithEncodedServerResponse(

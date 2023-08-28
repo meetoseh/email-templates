@@ -150,6 +150,9 @@ const COMPRESSION_BOMB_RATIO = 100;
  * a Content-Encoding of any of the `acceptableEncodings`, and will properly detect
  * and abort compression bombs.
  *
+ * This handles checking the Content-Type header, and will not attempt to parse the
+ * body unless it's acceptable.
+ *
  * @param args The route body standard locals
  * @param opts Options for loading the body
  * @returns undefined if the request was canceled, otherwise the parsed JSON

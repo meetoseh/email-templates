@@ -13,6 +13,12 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { finishWithBadEncoding } from './finishWithBadEncoding';
 import { finishWithServiceUnavailable } from './finishWithServiceUnavailable';
+import { STANDARD_VARY_RESPONSE } from './constants';
+import { AcceptMediaRangeWithoutWeight, parseAccept, selectAccept } from './accept';
+import { parseContentType } from './contentType';
+import { finishWithBadRequest } from './finishWithBadRequest';
+import { finishWithNotAcceptable } from './finishWithNotAcceptable';
+import { BAD_REQUEST_MESSAGE } from './errors';
 
 /**
  * A static route handler, which just serves the contents of the file at the
@@ -30,6 +36,11 @@ export const staticRouteHandler = async (
 ): Promise<
   (routerPrefix: string) => (req: IncomingMessage, resp: ServerResponse) => CancelablePromise<void>
 > => {
+  const parsedContentType = parseContentType(options.contentType);
+  if (parsedContentType === undefined) {
+    throw new Error('invalid content type');
+  }
+
   const hasher = crypto.createHash('sha512');
   hasher.update(filepath, 'utf-8');
   const cacheKey = hasher.digest('base64url');
@@ -39,7 +50,38 @@ export const staticRouteHandler = async (
       compress(filepath, `tmp/${cacheKey}.${encoding}`, encoding)
     )
   );
+  const acceptable: AcceptMediaRangeWithoutWeight[] = [parsedContentType];
+
+  if ('charset' in parsedContentType.parameters) {
+    const charset = parsedContentType.parameters.charset;
+    if (charset === 'utf8') {
+      acceptable.push({
+        ...parsedContentType,
+        parameters: { ...parsedContentType.parameters, charset: 'utf-8' },
+      });
+    } else if (charset === 'utf-8') {
+      acceptable.push({
+        ...parsedContentType,
+        parameters: { ...parsedContentType.parameters, charset: 'utf8' },
+      });
+    }
+  }
+
   return simpleRouteHandler(async (args) => {
+    let accept;
+    try {
+      accept = selectAccept(parseAccept(args.req.headers['accept']), acceptable);
+    } catch (e) {
+      if (e instanceof Error && e.message === BAD_REQUEST_MESSAGE) {
+        return finishWithBadRequest(args);
+      }
+      throw e;
+    }
+
+    if (accept === undefined) {
+      return finishWithNotAcceptable(args, acceptable);
+    }
+
     const coding = selectEncoding(parseAcceptEncoding(args.req.headers['accept-encoding']));
     if (coding === null) {
       return finishWithBadEncoding(args);
@@ -55,7 +97,7 @@ export const staticRouteHandler = async (
 
     args.resp.statusCode = 200;
     args.resp.statusMessage = 'OK';
-    args.resp.setHeader('Vary', 'Accept-Encoding');
+    args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
     args.resp.setHeader('Content-Encoding', coding);
     args.resp.setHeader('Content-Type', options.contentType);
     args.resp.setHeader(

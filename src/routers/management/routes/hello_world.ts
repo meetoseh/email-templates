@@ -11,6 +11,7 @@ import { finishWithBadEncoding } from '../../lib/finishWithBadEncoding';
 import { JSONValue, OASMediaType, OASPathItem, OASRequestBody } from '../../lib/openapi';
 import { loadBodyJson } from '../../lib/loadBodyJson';
 import { RouteBodyArgs } from '../../lib/RouteBodyArgs';
+import { STANDARD_VARY_RESPONSE } from '../../lib/constants';
 
 const helloWorldRoute: PendingRoute = {
   methods: ['GET', 'POST'],
@@ -25,7 +26,7 @@ const helloWorldRoute: PendingRoute = {
       if (args.req.method === 'GET') {
         args.resp.statusCode = 200;
         args.resp.statusMessage = 'OK';
-        args.resp.setHeader('Vary', 'Accept-Encoding');
+        args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
         args.resp.setHeader('Content-Encoding', coding);
         args.resp.setHeader('Content-Type', 'application/json; charset=utf-8');
 
@@ -55,7 +56,7 @@ const helloWorldRoute: PendingRoute = {
         const body = checkResult.parsed;
         args.resp.statusCode = 200;
         args.resp.statusMessage = 'OK';
-        args.resp.setHeader('Vary', 'Accept-Encoding');
+        args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
         args.resp.setHeader('Content-Encoding', coding);
         args.resp.setHeader('Content-Type', 'application/json; charset=utf-8');
 
@@ -276,7 +277,7 @@ function finishWithInvalidBody(
   args.resp.statusCode = err.category;
   args.resp.statusMessage = err.category === 400 ? 'Bad Request' : 'Unprocessable Entity';
   args.resp.setHeader('Content-Type', 'application/json; charset=utf-8');
-  args.resp.setHeader('Vary', 'Accept-Encoding');
+  args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
   args.resp.setHeader('Content-Encoding', encoding);
   return finishWithEncodedServerResponse(
     args,

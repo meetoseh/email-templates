@@ -15,6 +15,16 @@ import { spawn } from 'child_process';
 import { simpleRouteHandler } from '../../lib/simpleRouteHandler';
 import { finishWithBadEncoding } from '../../lib/finishWithBadEncoding';
 import { finishWithServiceUnavailable } from '../../lib/finishWithServiceUnavailable';
+import { STANDARD_VARY_RESPONSE } from '../../lib/constants';
+import { AcceptMediaRangeWithoutWeight, parseAccept, selectAccept } from '../../lib/accept';
+import { BAD_REQUEST_MESSAGE } from '../../lib/errors';
+import { finishWithBadRequest } from '../../lib/finishWithBadRequest';
+import { finishWithNotAcceptable } from '../../lib/finishWithNotAcceptable';
+
+const acceptable: AcceptMediaRangeWithoutWeight[] = [
+  { type: 'application', subtype: 'json', parameters: { charset: 'utf-8' } },
+  { type: 'application', subtype: 'json', parameters: { charset: 'utf8' } },
+];
 
 /**
  * Creates a new meta-route based which returns the OpenAPI schema. The returned
@@ -56,6 +66,20 @@ export const constructOpenapiSchemaRoute = (): Route => {
         return finishWithBadEncoding(args);
       }
 
+      let accept;
+      try {
+        accept = selectAccept(parseAccept(args.req.headers['accept']), acceptable);
+      } catch (e) {
+        if (e instanceof Error && e.message === BAD_REQUEST_MESSAGE) {
+          return finishWithBadRequest(args);
+        }
+        throw e;
+      }
+
+      if (accept === undefined) {
+        return finishWithNotAcceptable(args, acceptable);
+      }
+
       if (!fs.existsSync(pathToEncoding(coding))) {
         return finishWithServiceUnavailable(args, { retryAfterSeconds: 5 });
       }
@@ -71,7 +95,7 @@ export const constructOpenapiSchemaRoute = (): Route => {
 
       args.resp.statusCode = 200;
       args.resp.statusMessage = 'OK';
-      args.resp.setHeader('Vary', 'Accept-Encoding');
+      args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
       args.resp.setHeader('Content-Encoding', coding);
       args.resp.setHeader('Content-Type', 'application/json; charset=utf-8');
       return finishWithEncodedServerResponse(args, 'identity', responseStream);
