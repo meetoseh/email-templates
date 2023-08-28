@@ -83,6 +83,8 @@ export const simpleEmailRoute = <T extends object>(
           return await finishWithNotAcceptable(args, acceptable);
         }
 
+        // TODO: Verify authorization
+
         const bodyJson = await loadBodyJson(args, {});
         if (args.state.finishing) {
           return;
