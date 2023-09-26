@@ -225,7 +225,7 @@ const messageStyle = {
   color: '#ffffff',
   fontWeight: 300,
   textAlign: 'center',
-  padding: '0 90px 32px 90px',
+  padding: '0 0 32px 0',
   lineHeight: '1.5',
 } as const;
 
