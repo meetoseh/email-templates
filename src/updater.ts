@@ -107,6 +107,12 @@ export function handleUpdates(onReady: () => void): CancelablePromise<void> {
         const message = await messageCancelable.promise;
         console.log(`${colorNow()} ${chalk.whiteBright(`updater received signal: ${message}`)}`);
 
+        console.log(
+          `${colorNow()} ${chalk.gray('waiting a few seconds for github to cache the update...')}`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        console.log(`${colorNow()} ${chalk.gray('acquiring update lock...')}`);
+
         try {
           const acquireLockCancelable = acquireUpdateLock();
           await raceCancelable(canceled, acquireLockCancelable);
