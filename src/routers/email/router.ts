@@ -1,10 +1,17 @@
 import { PendingRoute } from '../lib/route';
 import { SampleRoute } from '../../../emails/sample';
 import { DailyReminderRoute } from '../../../emails/dailyReminder';
+import { ResetPasswordRoute } from '../../../emails/resetPassword';
+import { VerifyEmailCodeRoute } from '../../../emails/verifyEmailCode';
 import { EmailRoute } from './lib/emailRoute';
 import { OASResponses } from '../lib/openapi';
 
-const emailRoutes: EmailRoute[] = [SampleRoute, DailyReminderRoute];
+const emailRoutes: EmailRoute[] = [
+  SampleRoute,
+  DailyReminderRoute,
+  ResetPasswordRoute,
+  VerifyEmailCodeRoute,
+];
 
 const routes: PendingRoute[] = emailRoutes.map((emailRoute) => ({
   methods: ['POST'],

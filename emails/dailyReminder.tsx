@@ -5,6 +5,7 @@ import s from '../src/routers/lib/schemaHelpers';
 import * as React from 'react';
 import { SmartQuotesText } from '../src/lib/SmartQuotesText';
 import { OpenSansFont } from '../src/lib/OpenSansFont';
+import { CommunitySection } from '../src/lib/CommunitySection';
 
 let { Link, Body, Container, Head, Html, Preview, Text, Hr, Img, Row, Column, Section, render } =
   components;
@@ -75,52 +76,7 @@ const DailyReminder = ({
           </Container>
         </Container>
       </Container>
-      <Container style={communitySection}>
-        <Container style={container}>
-          <Text style={joinOurCommunity}>Join Our Community</Text>
-          <Section style={socialIconsSection}>
-            <Row>
-              <Column>
-                <Link href="https://tiktok.com/@meetoseh">
-                  <Img
-                    alt="TikTok"
-                    src="https://oseh.io/email-assets/tiktok-white-on-black-96w.png"
-                    style={socialIcon}
-                  />
-                </Link>
-              </Column>
-              <Column style={socialIconsSpacerColumn} />
-              <Column>
-                <Link href="https://instagram.com/meetoseh">
-                  <Img
-                    alt="Instagram"
-                    src="https://oseh.io/email-assets/instagram-white-on-black-96w.png"
-                    style={socialIcon}
-                  />
-                </Link>
-              </Column>
-              <Column style={socialIconsSpacerColumn} />
-              <Column>
-                <Link href="https://x.com/meetoseh">
-                  <Img
-                    alt="TikTok"
-                    src="https://oseh.io/email-assets/x-black-96w.png"
-                    style={socialIconX}
-                  />
-                </Link>
-              </Column>
-            </Row>
-          </Section>
-          <Text style={unsubscribe}>
-            No longer want to receive these emails?{' '}
-            <Link style={unsubscribeLink} href={unsubscribeUrl}>
-              Unsubscribe
-            </Link>
-          </Text>
-          <Text style={addressLine}>Oseh</Text>
-          <Text style={addressLine}>1752 NW Market Street #4051 Seattle, Washington 98107</Text>
-        </Container>
-      </Container>
+      <CommunitySection unsubscribeUrl={unsubscribeUrl} />
     </Body>
   </Html>
 );
@@ -229,13 +185,13 @@ const messageStyle = {
   lineHeight: '1.5',
 } as const;
 
-const ctaContainer = {
+export const ctaContainer = {
   width: '100%',
   textAlign: 'center',
   padding: '0 0 48px 0',
 } as const;
 
-const cta = {
+export const cta = {
   backgroundColor: '#f9f9f9',
   fontWeight: 400,
   color: '#2D2E2E',
@@ -263,56 +219,3 @@ const bookCall = {
   fontWeight: 400,
   textDecoration: 'underline',
 };
-
-const communitySection = {
-  backgroundColor: '#F9F9F9',
-  margin: '0 auto',
-};
-
-const joinOurCommunity = {
-  color: '#1D3345',
-  fontWeight: 600,
-  textAlign: 'center',
-  marginTop: '0',
-  fontSize: '15px',
-} as const;
-
-const socialIconsSection = {
-  width: `${24 * 3 + 24 * 2}px`,
-} as const;
-const socialIconsSpacerColumn = {
-  width: '24px',
-};
-const socialIcon = {
-  width: '24px',
-  height: '24px',
-};
-
-const socialIconX = {
-  width: '16px',
-  height: '16px',
-  padding: '4px',
-};
-
-const unsubscribe = {
-  color: '#6f6f6f',
-  textAlign: 'center',
-  fontWeight: 300,
-  fontSize: '10px',
-} as const;
-
-const unsubscribeLink = {
-  color: '#6f6f6f',
-  textAlign: 'center',
-  fontWeight: 300,
-  fontSize: '10px',
-  textDecoration: 'underline',
-} as const;
-
-const addressLine = {
-  color: '#6f6f6f',
-  textAlign: 'center',
-  fontWeight: 300,
-  fontSize: '10px',
-  margin: '0',
-} as const;
