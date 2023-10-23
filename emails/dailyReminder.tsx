@@ -197,6 +197,7 @@ export const cta = {
   color: '#2D2E2E',
   padding: '16px 60px',
   borderRadius: '30px',
+  fontSize: '16px',
 } as const;
 
 const feedbackQuestion = {
