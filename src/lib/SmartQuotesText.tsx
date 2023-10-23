@@ -7,7 +7,7 @@ type SmartQuotesProps = {
   children: string;
 };
 
-const RIGHT_SINGLE_QUOTE = String.fromCharCode(8217);
+export const RIGHT_SINGLE_QUOTE = String.fromCharCode(8217);
 
 /**
  * Returns a fragment containing the child but with quotes replaced
