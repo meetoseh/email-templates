@@ -62,7 +62,7 @@ export const OpenSansFont = ({
 
   const defaultFontFamily = `
   * {
-    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+    font-family: 'Open Sans', -apple-system, -webkit-system-font, 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
   `;
 
