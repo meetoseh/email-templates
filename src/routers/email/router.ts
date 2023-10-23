@@ -1,6 +1,7 @@
 import { PendingRoute } from '../lib/route';
 import { SampleRoute } from '../../../emails/sample';
 import { DailyReminderRoute } from '../../../emails/dailyReminder';
+import { EmailLaunchAnnouncementRoute } from '../../../emails/emailLaunchAnnouncement';
 import { ResetPasswordRoute } from '../../../emails/resetPassword';
 import { VerifyEmailCodeRoute } from '../../../emails/verifyEmailCode';
 import { EmailRoute } from './lib/emailRoute';
@@ -11,6 +12,7 @@ const emailRoutes: EmailRoute[] = [
   DailyReminderRoute,
   ResetPasswordRoute,
   VerifyEmailCodeRoute,
+  EmailLaunchAnnouncementRoute,
 ];
 
 const routes: PendingRoute[] = emailRoutes.map((emailRoute) => ({
