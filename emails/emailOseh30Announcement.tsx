@@ -36,15 +36,15 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
     </Head>
     <Preview>Transform Minutes into Moments of Mindfulness</Preview>
     <Body style={main}>
-      <Container>
+      <Section style={banner}>
         <Img
-          src="https://oseh.io/email-assets/oseh30Launch/banner.png"
+          src="https://oseh.io/email-assets/oseh30Launch/banner.jpg"
           alt="person in serene landscape"
           width="100%"
           height="331px"
         />
-      </Container>
-      <Container style={par0}>
+      </Section>
+      <Section style={par0}>
         <Text style={title1}>Reclaim Your Calm</Text>
         <Text style={body1}>
           Discover a world where peace of mind is a simple, accessible part of your daily routine.
@@ -59,16 +59,16 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             Try it Now
           </Link>
         </Container>
-      </Container>
-      <Container style={sepWrapper}>
+      </Section>
+      <Section style={sepWrapper}>
         <Container style={sep} />
-      </Container>
-      <Container style={par0b}>
+      </Section>
+      <Section style={par0b}>
         <Text style={title2}>
           Oseh 3.0: A New Era of Mindfulness is Here: Bite-Sized, Tailored and Impactful
         </Text>
-      </Container>
-      <Container style={leftRight}>
+      </Section>
+      <Section style={leftRight}>
         <Row>
           <Column>
             <Img
@@ -85,8 +85,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             </Text>
           </Column>
         </Row>
-      </Container>
-      <Container style={leftRight}>
+      </Section>
+      <Section style={leftRight}>
         <Row>
           <Column style={leftText}>
             <Text style={title3}>No endless browsing, just straight to what you need</Text>
@@ -103,8 +103,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             />
           </Column>
         </Row>
-      </Container>
-      <Container style={leftRight}>
+      </Section>
+      <Section style={leftRight}>
         <Row>
           <Column>
             <Img
@@ -122,8 +122,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             </Text>
           </Column>
         </Row>
-      </Container>
-      <Container style={leftRight}>
+      </Section>
+      <Section style={leftRight}>
         <Row>
           <Column style={leftText}>
             <Text style={title3}>Celebrate your journey and achievements</Text>
@@ -141,8 +141,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             />
           </Column>
         </Row>
-      </Container>
-      <Container style={leftRight}>
+      </Section>
+      <Section style={leftRight}>
         <Row>
           <Column>
             <Img
@@ -160,8 +160,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             </Text>
           </Column>
         </Row>
-      </Container>
-      <Container style={leftRight}>
+      </Section>
+      <Section style={leftRight}>
         <Row>
           <Column style={leftText}>
             <Text style={title3}>Everything you already love for free</Text>
@@ -180,8 +180,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             />
           </Column>
         </Row>
-      </Container>
-      <Container style={outro}>
+      </Section>
+      <Section style={outro}>
         <Text style={outroTitle}>Our mission is to make a better everyday for everyone.</Text>
         <Text style={outroBody}>
           Together, let{RIGHT_SINGLE_QUOTE}s explore the profound impact of mindfulness on our
@@ -195,8 +195,8 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
             Try it Now
           </Link>
         </Container>
-      </Container>
-      <CommunitySection />
+      </Section>
+      <CommunitySection noUnsubscribe wide />
     </Body>
   </Html>
 );
@@ -238,16 +238,28 @@ export const EmailOseh30AnnouncementRoute: EmailRoute =
     },
   });
 
+const main = {
+  backgroundColor: '#ffffff',
+  width: '100%',
+};
+
+const wideSection = {
+  maxWidth: '714px',
+  margin: '0 auto',
+};
+
+const banner = {
+  ...wideSection,
+  width: '100%',
+};
+
 const ctaContainer = {
   textAlign: 'left',
   padding: '32px 0 80px 0',
 } as const;
 
-const main = {
-  backgroundColor: '#ffffff',
-};
-
 const par0 = {
+  ...wideSection,
   backgroundColor: '#191C1D',
   paddingTop: '48px',
   paddingLeft: '66px',
@@ -274,6 +286,7 @@ const body1 = {
 };
 
 const sepWrapper = {
+  ...wideSection,
   backgroundColor: '#191C1D',
   paddingLeft: '66px',
   paddingRight: '66px',
@@ -284,6 +297,7 @@ const sep = {
 };
 
 const par0b = {
+  ...wideSection,
   backgroundColor: '#191C1D',
   paddingTop: 32,
   paddingLeft: 66,
@@ -306,11 +320,13 @@ const title2 = {
 };
 
 const leftRight = {
+  ...wideSection,
   paddingLeft: '66px',
   paddingRight: '66px',
   paddingTop: '44px',
   paddingBottom: '44px',
   backgroundColor: '#191C1D',
+  width: '100%',
 };
 
 const title3 = {
@@ -321,11 +337,13 @@ const title3 = {
 };
 
 const outro = {
+  ...wideSection,
   backgroundColor: '#191C1D',
   paddingTop: '28px',
   paddingBottom: '44px',
   paddingLeft: '66px',
   paddingRight: '66px',
+  width: '100%',
 };
 
 const outroTitle = {

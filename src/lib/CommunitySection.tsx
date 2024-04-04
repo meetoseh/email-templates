@@ -26,13 +26,15 @@ export const CommunitySection = ({
   unsubscribeHint = 'No longer want to receive these emails?',
   unsubscribeCTA = 'Unsubscribe',
   noUnsubscribe = false,
+  wide = false,
 }: {
   unsubscribeUrl?: string;
   unsubscribeHint?: string;
   unsubscribeCTA?: string;
   noUnsubscribe?: boolean;
-}) => (
-  <Container style={communitySection}>
+  wide?: boolean;
+}) => {
+  const inner = (
     <Container style={container}>
       <Text style={joinOurCommunity}>Join Our Community</Text>
       <Section style={socialIconsSection}>
@@ -82,15 +84,26 @@ export const CommunitySection = ({
       </Text>
       <Text style={addressLine}>1752 NW Market Street #4051 Seattle, Washington 98107</Text>
     </Container>
-  </Container>
-);
+  );
+
+  if (wide) {
+    return <Section style={communitySectionWide}>{inner}</Section>;
+  }
+  return <Container style={communitySection}>{inner}</Container>;
+};
 
 const container = {
   padding: '24px',
+  backgroundColor: '#F9F9F9',
 };
 
 const communitySection = {
-  backgroundColor: '#F9F9F9',
+  margin: '0 auto',
+};
+
+const communitySectionWide = {
+  maxWidth: '714px',
+  width: '100%',
   margin: '0 auto',
 };
 
