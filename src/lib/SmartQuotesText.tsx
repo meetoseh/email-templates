@@ -9,6 +9,8 @@ type SmartQuotesProps = {
 
 export const RIGHT_SINGLE_QUOTE = String.fromCharCode(8217);
 
+export const LONG_DASH = String.fromCharCode(8212);
+
 /**
  * Returns a fragment containing the child but with quotes replaced
  * with their curly variants
