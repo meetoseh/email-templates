@@ -94,17 +94,18 @@ export const CommunitySection = ({
 
 const container = {
   padding: '24px',
-  backgroundColor: '#F9F9F9',
 };
 
 const communitySection = {
   margin: '0 auto',
+  backgroundColor: '#F9F9F9',
 };
 
 const communitySectionWide = {
   maxWidth: '714px',
   width: '100%',
   margin: '0 auto',
+  backgroundColor: '#F9F9F9',
 };
 
 const joinOurCommunity = {

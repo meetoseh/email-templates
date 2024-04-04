@@ -61,7 +61,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
         </Container>
       </Section>
       <Section style={sepWrapper}>
-        <Container style={sep} />
+        <Section style={sep} />
       </Section>
       <Section style={par0b}>
         <Text style={title2}>
