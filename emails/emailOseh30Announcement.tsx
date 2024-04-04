@@ -223,11 +223,11 @@ const EmailLaunchAnnouncementPlain = ({}: EmailLaunchAnnouncementProps) =>
   'iOS App Store: https://apps.apple.com/app/apple-store/id6453520882\n\n' +
   'Google Play Store: https://play.google.com/store/apps/details?id=com.oseh.frontendapp\n';
 
-export const EmailLaunchAnnouncementRoute: EmailRoute =
+export const EmailOseh30AnnouncementRoute: EmailRoute =
   simpleEmailRoute<EmailLaunchAnnouncementProps>({
-    slug: 'emailLaunchAnnouncement',
-    summary: 'The announcement email for Sign in with Oseh',
-    description: 'Informs a user that Sign in with Oseh is now publicly available',
+    slug: 'emailOseh30Announcement',
+    summary: 'The announcement email for Oseh 3.0',
+    description: 'Informs a user that Oseh 3.0 is now publicly available',
     schema: s.object({}),
     render: (props, format) => {
       if (format === 'plain') {
