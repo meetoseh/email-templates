@@ -33,6 +33,19 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
   <Html>
     <Head>
       <OpenSansFont weights={[400, 600]} italicWeights={[]} />
+      <style>{`
+        @media (max-width: 600px) {
+          .smallImg {
+            width: 180px !important;
+            height: 180px !important;
+          }
+
+          .horizontalPadding {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+          }
+        }
+      `}</style>
     </Head>
     <Preview>Transform Minutes into Moments of Mindfulness</Preview>
     <Body style={main}>
@@ -42,9 +55,10 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
           alt="person in serene landscape"
           width="100%"
           height="331px"
+          style={{ objectFit: 'cover' }}
         />
       </Section>
-      <Section style={par0}>
+      <Section style={par0} className="horizontalPadding">
         <Text style={title1}>Reclaim Your Calm</Text>
         <Text style={body1}>
           Discover a world where peace of mind is a simple, accessible part of your daily routine.
@@ -60,15 +74,15 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
           </Link>
         </Container>
       </Section>
-      <Section style={sepWrapper}>
+      <Section style={sepWrapper} className="horizontalPadding">
         <Section style={sep} />
       </Section>
-      <Section style={par0b}>
+      <Section style={par0b} className="horizontalPadding">
         <Text style={title2}>
           Oseh 3.0: A New Era of Mindfulness is Here: Bite-Sized, Tailored and Impactful
         </Text>
       </Section>
-      <Section style={leftRight}>
+      <Section style={leftRight} className="horizontalPadding">
         <Row>
           <Column>
             <Img
@@ -76,6 +90,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
               alt="home page screenshot"
               width="270px"
               height="270px"
+              className="smallImg"
             />
           </Column>
           <Column style={rightText}>
@@ -86,7 +101,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
           </Column>
         </Row>
       </Section>
-      <Section style={leftRight}>
+      <Section style={leftRight} className="horizontalPadding">
         <Row>
           <Column style={leftText}>
             <Text style={title3}>No endless browsing, just straight to what you need</Text>
@@ -100,11 +115,12 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
               alt="emotions screenshot"
               width="270px"
               height="270px"
+              className="smallImg"
             />
           </Column>
         </Row>
       </Section>
-      <Section style={leftRight}>
+      <Section style={leftRight} className="horizontalPadding">
         <Row>
           <Column>
             <Img
@@ -112,6 +128,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
               alt="series screenshots, stacked. top series name: Deep Relaxation by Allison Bag"
               width="270px"
               height="270px"
+              className="smallImg"
             />
           </Column>
           <Column style={rightText}>
@@ -123,7 +140,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
           </Column>
         </Row>
       </Section>
-      <Section style={leftRight}>
+      <Section style={leftRight} className="horizontalPadding">
         <Row>
           <Column style={leftText}>
             <Text style={title3}>Celebrate your journey and achievements</Text>
@@ -138,11 +155,12 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
               alt="progress screenshot, 7 day streak"
               width="270px"
               height="270px"
+              className="smallImg"
             />
           </Column>
         </Row>
       </Section>
-      <Section style={leftRight}>
+      <Section style={leftRight} className="horizontalPadding">
         <Row>
           <Column>
             <Img
@@ -150,6 +168,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
               alt="purchase oseh+ screen"
               width="270px"
               height="270px"
+              className="smallImg"
             />
           </Column>
           <Column style={rightText}>
@@ -161,7 +180,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
           </Column>
         </Row>
       </Section>
-      <Section style={leftRight}>
+      <Section style={leftRight} className="horizontalPadding">
         <Row>
           <Column style={leftText}>
             <Text style={title3}>Everything you already love for free</Text>
@@ -177,11 +196,12 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
               alt="person meditating"
               width="270px"
               height="270px"
+              className="smallImg"
             />
           </Column>
         </Row>
       </Section>
-      <Section style={outro}>
+      <Section style={outro} className="horizontalPadding">
         <Text style={outroTitle}>Our mission is to make a better everyday for everyone.</Text>
         <Text style={outroBody}>
           Together, let{RIGHT_SINGLE_QUOTE}s explore the profound impact of mindfulness on our
@@ -241,6 +261,8 @@ export const EmailOseh30AnnouncementRoute: EmailRoute =
 const main = {
   backgroundColor: '#ffffff',
   width: '100%',
+  padding: '0',
+  margin: '0',
 };
 
 const wideSection = {
