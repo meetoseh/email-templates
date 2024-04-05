@@ -27,9 +27,13 @@ if (Body === undefined) {
   render = comps.render;
 }
 
-export type EmailLaunchAnnouncementProps = {};
+export type EmailLaunchAnnouncementProps = {
+  unsubscribeUrl: string;
+};
 
-const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
+const EmailLaunchAnnouncement = ({
+  unsubscribeUrl = 'https://oseh.io',
+}: EmailLaunchAnnouncementProps) => (
   <Html>
     <Head>
       <OpenSansFont weights={[400, 600]} italicWeights={[]} />
@@ -216,7 +220,7 @@ const EmailLaunchAnnouncement = ({}: EmailLaunchAnnouncementProps) => (
           </Link>
         </Container>
       </Section>
-      <CommunitySection noUnsubscribe wide />
+      <CommunitySection unsubscribeUrl={unsubscribeUrl} wide />
     </Body>
   </Html>
 );
@@ -248,7 +252,15 @@ export const EmailOseh30AnnouncementRoute: EmailRoute =
     slug: 'emailOseh30Announcement',
     summary: 'The announcement email for Oseh 3.0',
     description: 'Informs a user that Oseh 3.0 is now publicly available',
-    schema: s.object({}),
+    schema: s.object({
+      unsubscribeUrl: s.string(
+        {
+          title: 'Unsubscribe URL',
+          description: 'The URL to send the user to when they click the unsubscribe link.',
+        },
+        { maxLength: 2048 }
+      ),
+    }),
     render: (props, format) => {
       if (format === 'plain') {
         return EmailLaunchAnnouncementPlain(props);
