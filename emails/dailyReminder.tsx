@@ -93,34 +93,37 @@ export const DailyReminderRoute: EmailRoute = simpleEmailRoute<DailyReminderProp
   slug: 'dailyReminder',
   summary: 'A template for short reminder messages',
   description:
-    'A basic template that greets the user, says the message very prominently, ' +
-    'then provides a call to action that goes to the given URL. This template ' +
-    'may include current general marketing initiatives below, like a feedback ' +
-    'call or link to a recent blog post, but user-tailored content should go in ' +
-    'a different template.',
+    'The original daily reminder template.\n' +
+    'Logo, separator, greeting, message, CTA, book a call link, footer.',
   schema: s.object({
     name: s.string(
-      { title: 'Name', description: 'The name of the person to greet. First name preferred.' },
+      {
+        title: 'Name',
+        description: 'The name of the person to greet. Usually autofilled via {name}',
+        example: '{name}',
+      },
       { maxLength: 255 }
     ),
     message: s.string({
       title: 'Message',
-      description:
-        "The message to display, e.g, 'Stress-Free Days Begin with Mindfulness'. " +
-        "Quotes should be basic (e.g., ') and they will be converted to curly quotes " +
-        'where appropriate.',
+      description: 'The primary message to display. Quotes are auto-converted to smart quotes.',
+      example: "Let's lift your mood in just 60 seconds.",
     }),
     url: s.string(
       {
         title: 'URL',
-        description: 'The URL to send the user to when they click the button.',
+        description:
+          'The URL to send the user to when they click the button. Usually autofilled via {url}',
+        example: '{url}',
       },
       { maxLength: 2048 }
     ),
     unsubscribeUrl: s.string(
       {
         title: 'Unsubscribe URL',
-        description: 'The URL to send the user to when they click the unsubscribe link.',
+        description:
+          'The URL to send the user to when they click the unsubscribe link. Usually autofilled via {unsubscribe_url}',
+        example: '{unsubscribe_url}',
       },
       { maxLength: 2048 }
     ),

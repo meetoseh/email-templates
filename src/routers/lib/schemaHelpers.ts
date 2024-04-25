@@ -33,7 +33,10 @@ export type Field = {
   buildValidator: () => (args: unknown) => FieldValidation;
 };
 
-/** https://datatracker.ietf.org/doc/html/draft-wright-json-schema-validation-00#section-6 */
+/**
+ * https://datatracker.ietf.org/doc/html/draft-wright-json-schema-validation-00#section-6
+ * https://swagger.io/specification/v3/#:~:text=A%20free%2Dform%20property%20to%20include%20an%20example
+ */
 type FieldMetadata = {
   /**
    * A preferrably short string generally used to relabel the field,
@@ -46,6 +49,16 @@ type FieldMetadata = {
    * analagous to adding documentation comments to the type or field.
    */
   description?: string;
+
+  /**
+   * A valid example of this field, or a string escaped version if it cannot
+   * be represented in json.
+   *
+   * This is used for pre-filling a value in the auto-generated forms on the
+   * admin side, which means often it's helpful for the example to be a format
+   * string (e.g., `{name}`) as that's what would usually be used.
+   */
+  example?: any;
 };
 
 /**
