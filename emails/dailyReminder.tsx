@@ -70,7 +70,7 @@ const DailyReminder = ({
           </Container>
           <Text style={feedbackQuestion}>Have feedback or suggestions?</Text>
           <Container style={bookCallContainer}>
-            <Link style={bookCall} href="https://calendly.com/paul-javid/oseh-feedback">
+            <Link style={bookCall} href="https://calendly.com/paul-javid/15min">
               Book a call with our CEO
             </Link>
           </Container>
