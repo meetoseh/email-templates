@@ -51,7 +51,7 @@ const DailyReminder = ({
 }: DailyReminderProps) => (
   <Html>
     <Head>
-      <OpenSansFont weights={[400, 600]} italicWeights={[]} />
+      <OpenSansFont weights={[300, 400, 600]} italicWeights={[]} />
       <style>{`
       @media (max-width: 600px) {
         .smallImg {
@@ -235,7 +235,7 @@ const par0 = {
 
 const title1 = {
   fontWeight: 400,
-  fontSize: '28px',
+  fontSize: '26px',
   lineHeight: '33.6px',
   textAlign: 'center',
   color: '#FFFFFF',
@@ -266,8 +266,8 @@ const streakAndQuote = {
 };
 
 const label1 = {
-  fontSize: '26px',
-  fontWeight: 400,
+  fontSize: '20px',
+  fontWeight: 300,
   lineHeight: '31px',
   textAlign: 'left',
   color: '#ffffff',
@@ -275,8 +275,8 @@ const label1 = {
 } as const;
 
 const value1 = {
-  fontSize: '26px',
-  fontWeight: 600,
+  fontSize: '20px',
+  fontWeight: 400,
   lineHeight: '31px',
   textAlign: 'left',
   color: '#ffffff',
@@ -284,9 +284,9 @@ const value1 = {
 } as const;
 
 const quote1 = {
-  fontSize: '20px',
-  fontWeight: 400,
-  lineHeight: '24px',
+  fontSize: '18px',
+  fontWeight: 300,
+  lineHeight: '22px',
   textAlign: 'center',
   color: '#ffffff',
   margin: '64px 0 0 0',
@@ -295,11 +295,11 @@ const quote1 = {
 const logoContainer = {
   ...wideSection,
   backgroundColor: '#191C1D',
-  padding: '40px 0 24px 0',
+  padding: '40px 0 40px 0',
 };
 
 const logo = {
   margin: '0 auto',
-  width: '75px',
-  height: '17.5px',
+  width: '63px',
+  height: '14.7px',
 };
