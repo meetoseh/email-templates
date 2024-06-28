@@ -22,6 +22,12 @@ export type OASSimpleDataType =
       format: 'string';
     }
   | {
+      type: 'string';
+      /** Custom format: a uid in `email_images` */
+      format: 'x-image';
+      'x-size': { width: number; height: number };
+    }
+  | {
       type: 'boolean';
       /** true or false */
       format: 'boolean';

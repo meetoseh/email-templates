@@ -113,6 +113,10 @@ export const SampleRoute: EmailRoute = simpleEmailRoute<SampleProps>({
         ),
       }
     ),
+    ztestF: s.image(
+      { title: 'Test Image', description: 'A 100x100 image for testing the admin area. Not used' },
+      { 'x-size': { width: 100, height: 100 } }
+    ),
   }),
   render: ({ name, message }, format) => {
     if (format === 'plain') {

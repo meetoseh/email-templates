@@ -371,6 +371,20 @@ type BooleanValidators = {
   enum?: boolean[];
 };
 
+type ImageValidators = StringValidators & {
+  /**
+   * The CSS width and height that the image will be rendered at within the
+   * email. The admin UI will use this for producing a preview of the image,
+   * and to provide it to the image processor if an image is being uploaded
+   */
+  'x-size': {
+    /** The width in CSS pixels */
+    width: number;
+    /** The height in CSS pixels */
+    height: number;
+  };
+};
+
 const s = {
   /**
    * The intended way to generate the final OASSchema object for a routes
@@ -681,6 +695,26 @@ const s = {
     },
   }),
 
+  /**
+   * Constructs a field that represents a JSON object that has multiple
+   * different possible shapes, depending on the value of one field that
+   * is included in all the shapes with a string value.
+   *
+   * This is required, but can be marked optional by wrapping it in `s.optional`.
+   *
+   * ```ts
+   * import s from './schemaHelpers';
+   *
+   * s.enumDiscriminator('type', [
+   *  s.object({ type: s.string(undefined, { enum: ['A'] }), a: s.string() }),
+   *  s.object({ type: s.string(undefined, { enum: ['B'] }), b: s.number('integer') }),
+   * ]);
+   * ```
+   *
+   * @param discriminator The field name that is used to determine the shape of the object
+   * @param oneOf The possible shapes of the object
+   * @param metadata Optional metadata for the object
+   */
   enumDiscriminator: (discriminator: string, oneOf: Field[], metadata?: FieldMetadata): Field => ({
     jsonType: 'object',
     required: true,
@@ -1249,6 +1283,36 @@ const s = {
         }
         return { matches: true };
       };
+    },
+  }),
+
+  /**
+   * Describes a string value which will be interpreted as the uid of a row
+   * in `email_images` and thus can be converted into a URL that can be
+   * embedded in the template. The image must be embedded at a fixed width
+   * and height, which must be exposed so that the caller knows what kind of
+   * image to provide.
+   *
+   * ```ts
+   * import s from './schemaHelpers';
+   *
+   * s.image(undefined, { 'x-size': { width: 100, height: 100 } });
+   * ```
+   *
+   * @param metadata Optional metadata for the image
+   * @param validators Additional validators for the image
+   */
+  image: (metadata: FieldMetadata | undefined, validators: ImageValidators): Field => ({
+    required: true,
+    jsonType: 'string',
+    build: () => ({
+      type: 'string',
+      format: 'x-image',
+      ...metadata,
+      ...validators,
+    }),
+    buildValidator: () => {
+      return s.string(undefined, validators).buildValidator();
     },
   }),
 };
