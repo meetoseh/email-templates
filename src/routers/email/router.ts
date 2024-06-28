@@ -5,6 +5,7 @@ import { DailyReminderRoute2 } from '../../../emails/dailyReminder2';
 import { EmailLaunchAnnouncementRoute } from '../../../emails/emailLaunchAnnouncement';
 import { EmailOseh30AnnouncementRoute } from '../../../emails/emailOseh30Announcement';
 import { EmailOseh302AnnouncementRoute } from '../../../emails/emailOseh302Announcement';
+import { PlainRoute } from '../../../emails/plain';
 import { ResetPasswordRoute } from '../../../emails/resetPassword';
 import { VerifyEmailCodeRoute } from '../../../emails/verifyEmailCode';
 import { EmailRoute } from './lib/emailRoute';
@@ -12,6 +13,7 @@ import { OASResponses } from '../lib/openapi';
 
 const emailRoutes: EmailRoute[] = [
   SampleRoute,
+  PlainRoute,
   DailyReminderRoute,
   DailyReminderRoute2,
   ResetPasswordRoute,

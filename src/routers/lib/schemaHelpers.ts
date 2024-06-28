@@ -1,4 +1,4 @@
-import { OASSchema, OASSimpleDataType } from './openapi';
+import { OASBasicSchema, OASObjectDataType, OASSchema, OASSimpleDataType } from './openapi';
 
 type FieldValidationSuccess = { matches: true };
 type FieldValidationError = { matches: false; errorPath: string[]; error: string };
@@ -59,6 +59,12 @@ type FieldMetadata = {
    * string (e.g., `{name}`) as that's what would usually be used.
    */
   example?: any;
+
+  /**
+   * A default value for this field. Should only be set if this field is
+   * within an object that does not require this property be set.
+   */
+  default?: any;
 };
 
 /**
@@ -307,6 +313,9 @@ type StringValidators = {
    * @see https://datatracker.ietf.org/doc/html/draft-wright-json-schema-validation-00#section-5.20
    */
   enum?: string[];
+
+  /** If true, the object can also be null */
+  nullable?: boolean;
 };
 
 /**
@@ -440,9 +449,15 @@ const s = {
     required: true,
     build: () => ({
       type: 'object',
-      required: Object.entries(fields)
-        .filter(([k, f]) => f.required)
-        .map(([k, v]) => k),
+      required: (() => {
+        const result = Object.entries(fields)
+          .filter(([k, f]) => f.required)
+          .map(([k, v]) => k);
+        if (result.length === 0) {
+          return undefined;
+        }
+        return result;
+      })(),
       properties: (() => {
         const result: Record<string, OASSchema> = {};
         for (const [k, f] of Object.entries(fields)) {
@@ -662,6 +677,80 @@ const s = {
         }
 
         return { matches: true };
+      };
+    },
+  }),
+
+  enumDiscriminator: (discriminator: string, oneOf: Field[], metadata?: FieldMetadata): Field => ({
+    jsonType: 'object',
+    required: true,
+    build: (): OASSchema => ({
+      type: 'object',
+      'x-enum-discriminator': discriminator,
+      oneOf: oneOf.map((o) => o.build()),
+      ...metadata,
+    }),
+    buildValidator: () => {
+      const discriminatorValueToValidator = new Map<string, (args: unknown) => FieldValidation>();
+      oneOf.forEach((o) => {
+        const built = o.build() as OASBasicSchema;
+        if (built.type !== 'object') {
+          throw new Error('enumDiscriminator oneOf must be objects');
+        }
+        const discrimSchema = built.properties[discriminator] as any;
+        if (discrimSchema?.type !== 'string') {
+          throw new Error('enumDiscriminator discriminator must be a string');
+        }
+        const discrimEnum = (discrimSchema as any).enum;
+        if (discrimEnum === null || discrimEnum === undefined) {
+          throw new Error('enumDiscriminator discriminator must have an enum validator');
+        }
+
+        if (!Array.isArray(discrimEnum)) {
+          throw new Error('enumDiscriminator discriminator enum must be an array');
+        }
+
+        const value = discrimEnum[0];
+        if (typeof value !== 'string') {
+          throw new Error('enumDiscriminator discriminator enum must have string values');
+        }
+
+        if (discriminatorValueToValidator.has(value)) {
+          throw new Error('enumDiscriminator discriminator values must be unique');
+        }
+
+        discriminatorValueToValidator.set(value, o.buildValidator());
+      });
+      return (args: unknown) => {
+        if (typeof args !== 'object') {
+          return {
+            matches: false,
+            errorPath: [],
+            error: 'expected to be an object',
+          };
+        }
+
+        const raw = args as Record<string, unknown>;
+        const value = raw[discriminator];
+
+        if (typeof value !== 'string') {
+          return {
+            matches: false,
+            errorPath: [discriminator],
+            error: 'expected to be a string',
+          };
+        }
+
+        const validator = discriminatorValueToValidator.get(value);
+        if (validator === undefined) {
+          return {
+            matches: false,
+            errorPath: [discriminator],
+            error: 'unexpected discriminator value',
+          };
+        }
+
+        return validator(raw);
       };
     },
   }),
@@ -999,6 +1088,10 @@ const s = {
       }
 
       return (v: unknown) => {
+        if (validators?.nullable && v === null) {
+          return { matches: true };
+        }
+
         if (typeof v !== 'string') {
           return {
             matches: false,

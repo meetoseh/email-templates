@@ -126,9 +126,10 @@ export type OASArrayTypeHint = {
 
 export type OASObjectDataType = OASObjectTypeHint & {
   /**
-   * Which fields are required for this object.
+   * Which fields are required for this object. Must not be an empty list,
+   * though may be omitted if all fields are optional.
    */
-  required: string[];
+  required?: string[];
 
   /**
    * A map of property names to their schemas.
@@ -280,6 +281,8 @@ export type OASComplexSchema =
   | {
       oneOf: OASSchema[];
       discriminator?: OASDiscriminator;
+      'x-enum-discriminator'?: string;
+      type?: 'object';
     };
 
 export type OASSchema = OASBasicSchema | OASComplexSchema;

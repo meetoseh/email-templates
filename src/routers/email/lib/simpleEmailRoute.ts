@@ -35,7 +35,7 @@ export type SimpleEmailRouteArgs<T extends object> = Omit<EmailRoute, 'handler' 
    *
    * @param args The args to render the email with
    * @param format The format to render the email in
-   * @returns The rendered email
+   * @returns The rendered email, or null if that format is unsupported
    */
   render: (args: T, format: 'html' | 'plain') => string;
 };

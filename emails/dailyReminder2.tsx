@@ -140,10 +140,7 @@ export const DailyReminderRoute2: EmailRoute = simpleEmailRoute<DailyReminderPro
   summary: 'A template for short reminder messages',
   description:
     'The second version of the daily reminder email.\n' +
-    'Logo, message, CTA, streak and goal row, quote, footer.\n\n' +
-    /* Its not true that these are available in the _template_, but they are available in the touch points
-       that use this template. By the time we receive anything, it will have already been replaced */
-    'Available substitutions: {name}, {goal}, {streak}, {goal_badge_url}, {time_of_day}, {url}, {unsubscribe_url}',
+    'Logo, message, CTA, streak and goal row, quote, footer.\n',
   schema: s.object({
     preview: s.string({
       title: 'Preview',
