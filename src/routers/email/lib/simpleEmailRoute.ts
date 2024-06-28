@@ -37,7 +37,7 @@ export type SimpleEmailRouteArgs<T extends object> = Omit<EmailRoute, 'handler' 
    * @param format The format to render the email in
    * @returns The rendered email, or null if that format is unsupported
    */
-  render: (args: T, format: 'html' | 'plain') => string;
+  render: (args: T, format: 'html' | 'plain') => string | null;
 };
 
 const acceptable: AcceptMediaRangeWithoutWeight[] = [
@@ -180,6 +180,24 @@ export const simpleEmailRoute = <T extends object>(
 
         const body = bodyJson as T;
         const rendered = routeArgs.render(body, accepted.subtype as 'html' | 'plain');
+
+        if (rendered === null) {
+          args.resp.statusCode = 404;
+          args.resp.statusMessage = 'Not Found';
+          args.resp.setHeader('Content-Encoding', coding);
+          args.resp.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          args.resp.setHeader('Vary', STANDARD_VARY_RESPONSE);
+          return finishWithEncodedServerResponse(
+            args,
+            coding,
+            Readable.from(
+              Buffer.from(
+                'This email template exists, but does not support the format requested (via Accept)',
+                'utf-8'
+              )
+            )
+          );
+        }
 
         args.resp.statusCode = 200;
         args.resp.statusMessage = 'OK';

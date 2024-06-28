@@ -163,8 +163,12 @@ export const PlainRoute: EmailRoute = simpleEmailRoute<PlainProps>({
     ),
   }),
   render: (props, format) => {
-    if (format === 'plain' || props.strictlyPlain) {
+    if (format === 'plain') {
       return Plain(props);
+    }
+
+    if (props.strictlyPlain) {
+      return null;
     }
 
     return render(<PlainHtml {...props} />);
