@@ -74,6 +74,10 @@ const routes: PendingRoute[] = emailRoutes.map((emailRoute) => ({
             '403': {
               description: 'Forbidden, e.g., invalid JWT (or wrong sub)',
             },
+            '404': {
+              description:
+                'Not Found, e.g., cannot produce the requested format (e.g., a strictly plain template but you requested html)',
+            },
             '422': {
               description:
                 'Unprocessable Entity - the request was well-formed but the request body was semantically incorrect',
