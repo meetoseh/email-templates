@@ -111,7 +111,7 @@ export const PlainRoute: EmailRoute = simpleEmailRoute<PlainProps>({
             s.object(
               {
                 type: s.string(
-                  { title: 'Paragraph', description: 'A paragraph of text' },
+                  { title: 'Paragraph', format: 'string-long', description: 'A paragraph of text' },
                   { enum: ['paragraph'] }
                 ),
                 text: s.string({
