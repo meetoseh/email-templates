@@ -1053,7 +1053,10 @@ const s = {
   /**
    * Describes a string acting as a string.
    */
-  string: (metadata?: FieldMetadata, validators?: StringValidators): Field => ({
+  string: (
+    metadata?: FieldMetadata & { format?: 'string' | 'string-long' },
+    validators?: StringValidators
+  ): Field => ({
     required: true,
     jsonType: 'string',
     build: () => ({

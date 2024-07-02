@@ -23,6 +23,11 @@ export type OASSimpleDataType =
     }
   | {
       type: 'string';
+      /** Unrestricted string, but acts as a hint that it will probably contain newlines */
+      format: 'string-long';
+    }
+  | {
+      type: 'string';
       /** Custom format: a uid in `email_images` */
       format: 'x-image';
       'x-size': { width: number; height: number };

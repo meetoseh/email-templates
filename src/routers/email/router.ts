@@ -1,4 +1,5 @@
 import { PendingRoute } from '../lib/route';
+import { BrandedV1Route } from '../../../emails/brandedv1';
 import { SampleRoute } from '../../../emails/sample';
 import { DailyReminderRoute } from '../../../emails/dailyReminder';
 import { DailyReminderRoute2 } from '../../../emails/dailyReminder2';
@@ -13,6 +14,7 @@ import { OASResponses } from '../lib/openapi';
 
 const emailRoutes: EmailRoute[] = [
   SampleRoute,
+  BrandedV1Route,
   PlainRoute,
   DailyReminderRoute,
   DailyReminderRoute2,
