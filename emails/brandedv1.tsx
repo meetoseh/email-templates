@@ -162,6 +162,14 @@ const BrandedV1Html = ({
     padding-right: 12px !important;
   }
 }
+@media (min-width: 600px) {
+  .padLeftWide {
+    padding-left: 40px !important;
+  }
+  .padRightWide {
+    padding-right: 40px !important;
+  }
+}
       `}</style>
     </Head>
     {preview && <Preview>{preview}</Preview>}
@@ -325,6 +333,7 @@ const BrandedV1Html = ({
                       color: colorsByName.light,
                       fontSize: '22px',
                       lineHeight: '28.6px',
+                      margin: `${idx === 0 ? '0' : '14.3px'} 0 0 0`,
                       marginLeft: '0',
                       marginRight: '0',
                       marginTop: idx === 0 ? '0' : '14.3px',
@@ -348,6 +357,7 @@ const BrandedV1Html = ({
                       color: colorsByName.light,
                       fontSize: '16px',
                       lineHeight: '24px',
+                      margin: `${idx === 0 ? '0' : '12px'} 0 0 0`,
                       marginLeft: '0',
                       marginRight: '0',
                       marginTop: idx === 0 ? '0' : '12px',
@@ -399,13 +409,52 @@ const BrandedV1Html = ({
                     paddingBottom: '0',
                     maxWidth: '582px',
                   }}>
-                  <Column className={c.text.on !== 'left' ? 'smallImg' : undefined}>
-                    {c.text.on === 'left' ? text : img}
-                  </Column>
-                  <Column style={{ width: '8px' }} />
-                  <Column className={c.text.on === 'left' ? 'smallImg' : undefined}>
-                    {c.text.on === 'left' ? img : text}
-                  </Column>
+                  {c.text.on === 'right' ? (
+                    <>
+                      <Column className="smallImg" width="auto">
+                        {img}
+                      </Column>
+                      <Column width="100%">
+                        <Section
+                          style={{
+                            margin: '0 auto 0 0',
+                            marginTop: '0',
+                            marginBottom: '0',
+                            padding: '0 8px',
+                            paddingTop: '0',
+                            paddingRight: '8px',
+                            paddingBottom: '0',
+                            paddingLeft: '8px',
+                          }}
+                          className="padLeftWide">
+                          {text}
+                        </Section>
+                      </Column>
+                    </>
+                  ) : (
+                    <>
+                      <Column width="100%">
+                        <Section
+                          width="auto"
+                          style={{
+                            margin: '0 0 0 auto',
+                            marginTop: '0',
+                            marginBottom: '0',
+                            padding: '0 8px',
+                            paddingTop: '0',
+                            paddingRight: '8px',
+                            paddingBottom: '0',
+                            paddingLeft: '8px',
+                          }}
+                          className="padRightWide">
+                          {text}
+                        </Section>
+                      </Column>
+                      <Column className="smallImg" width="auto">
+                        {img}
+                      </Column>
+                    </>
+                  )}
                 </Row>
               </Section>
             );
@@ -425,33 +474,45 @@ const BrandedV1Html = ({
                 }}
                 className="horizontalPadding">
                 <Section
+                  key={idx}
                   style={{
-                    width: 'auto',
-                    margin:
-                      c.align === 'left' ? '0' : c.align === 'center' ? '0 auto' : '0 0 0 auto',
+                    margin: '0 auto',
+                    marginTop: '0',
+                    marginBottom: '0',
+                    padding: '0',
+                    paddingTop: '0',
+                    paddingBottom: '0',
+                    maxWidth: '582px',
                   }}>
-                  <Link
-                    href={c.url}
+                  <Section
                     style={{
-                      display: 'block',
-                      textDecoration: 'none',
-                      color: colorsByName.dark,
-                      backgroundColor: colorsByName.light,
-                      borderRadius: '100px',
-                      padding: '16px 80px',
-                      paddingTop: '16px',
-                      paddingBottom: '16px',
-                      paddingLeft: '80px',
-                      fontSize: '16px',
-                      lineHeight: '24px',
-                      fontWeight: '400',
-                      textAlign: 'center',
-                      margin: '0',
-                      marginTop: '0',
-                      marginBottom: '0',
+                      width: 'auto',
+                      margin:
+                        c.align === 'left' ? '0' : c.align === 'center' ? '0 auto' : '0 0 0 auto',
                     }}>
-                    {c.text}
-                  </Link>
+                    <Link
+                      href={c.url}
+                      style={{
+                        display: 'block',
+                        textDecoration: 'none',
+                        color: colorsByName.dark,
+                        backgroundColor: colorsByName.light,
+                        borderRadius: '100px',
+                        padding: '16px 80px',
+                        paddingTop: '16px',
+                        paddingBottom: '16px',
+                        paddingLeft: '80px',
+                        fontSize: '16px',
+                        lineHeight: '24px',
+                        fontWeight: '400',
+                        textAlign: 'center',
+                        margin: '0',
+                        marginTop: '0',
+                        marginBottom: '0',
+                      }}>
+                      {c.text}
+                    </Link>
+                  </Section>
                 </Section>
               </Section>
             );
@@ -687,6 +748,9 @@ const TextBuilder = ({
   size: number;
   lineHeight: number;
 }) => {
+  const lineSpacing = `${(lineHeight * 0.5).toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+  })}px`;
   return (
     <Section
       style={{
@@ -704,15 +768,13 @@ const TextBuilder = ({
             color: colorsByName[color],
             fontSize: `${size}px`,
             lineHeight: `${lineHeight}px`,
-            margin: '0 auto',
-            marginTop:
-              idx === 0
-                ? '0'
-                : `${(lineHeight * 0.5).toLocaleString(undefined, { maximumFractionDigits: 2 })}px`,
+            margin: `${idx === 0 ? '0' : lineSpacing} ${align === 'center' ? 'auto' : '0'} 0 auto`,
+            marginTop: idx === 0 ? '0' : lineSpacing,
             marginBottom: '0',
             padding: '0',
             paddingTop: '0',
             paddingBottom: '0',
+            width: '100%',
             maxWidth: '582px',
           }}>
           {line}
