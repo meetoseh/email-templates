@@ -562,7 +562,7 @@ const BrandedV1Html = ({
                     </Text>
                     <Spacer height={16} noBackground />
                     <Row
-                      width={80}
+                      width={128}
                       style={{
                         margin: '0 auto',
                         marginTop: '0',
@@ -633,6 +633,46 @@ const BrandedV1Html = ({
                           }}>
                           <Img
                             src="https://oseh.io/email-assets/youtube-black-on-white-96w.png"
+                            width={96}
+                            height={96}
+                            style={{ width: '32px', height: '32px' }}
+                            alt="YouTube"
+                          />
+                        </Link>
+                      </Column>
+                      <Column
+                        width={16}
+                        style={{
+                          margin: '0',
+                          marginTop: '0',
+                          marginBottom: '0',
+                          padding: '0',
+                          paddingTop: '0',
+                          paddingBottom: '0',
+                        }}
+                      />
+                      <Column
+                        width={32}
+                        style={{
+                          margin: '0',
+                          marginTop: '0',
+                          marginBottom: '0',
+                          padding: '0',
+                          paddingTop: '0',
+                          paddingBottom: '0',
+                        }}>
+                        <Link
+                          href="https://tiktok.com/@meetoseh"
+                          style={{
+                            margin: '0',
+                            marginTop: '0',
+                            marginBottom: '0',
+                            padding: '0',
+                            paddingTop: '0',
+                            paddingBottom: '0',
+                          }}>
+                          <Img
+                            src="https://oseh.io/email-assets/tiktok-black-on-white-96w.png"
                             width={96}
                             height={96}
                             style={{ width: '32px', height: '32px' }}
@@ -768,7 +808,7 @@ const TextBuilder = ({
             color: colorsByName[color],
             fontSize: `${size}px`,
             lineHeight: `${lineHeight}px`,
-            margin: `${idx === 0 ? '0' : lineSpacing} ${align === 'center' ? 'auto' : '0'} 0 auto`,
+            margin: `${idx === 0 ? '0' : lineSpacing} auto 0 auto`,
             marginTop: idx === 0 ? '0' : lineSpacing,
             marginBottom: '0',
             padding: '0',
@@ -824,7 +864,7 @@ const BrandedV1Plain = ({
         case 'cta':
           return `${c.text}: ${c.url}\n\n`;
         case 'footer':
-          return `Join Our Community:\n- Instagram: https://www.instagram.com/meetoseh\n- YouTube: https://www.youtube.com/@meetoseh\n\nUnsubscribe: ${c.unsubscribe}\nSent By: Oseh, 1752 NW Market Street #4501, Seattle, Washington 98107\n\n`;
+          return `Join Our Community:\n- Instagram: https://www.instagram.com/meetoseh\n- YouTube: https://www.youtube.com/@meetoseh\n- TikTok: https://tiktok.com/@meetoseh\n\nUnsubscribe: ${c.unsubscribe}\nSent By: Oseh, 1752 NW Market Street #4501, Seattle, Washington 98107\n\n`;
         default:
           return '';
       }
