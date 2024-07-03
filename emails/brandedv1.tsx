@@ -676,7 +676,7 @@ const BrandedV1Html = ({
                             width={96}
                             height={96}
                             style={{ width: '32px', height: '32px' }}
-                            alt="YouTube"
+                            alt="TikTok"
                           />
                         </Link>
                       </Column>
