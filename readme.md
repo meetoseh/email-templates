@@ -36,7 +36,7 @@ standard environment variables and run with a command similar to the following
 (with e.g., the hostname updated to match your ip)
 
 ```sh
-npx ts-node --experimental-specifier-resolution=node --esm src/index.ts --host 192.168.1.23 --port 2999 --ssl-certfile oseh-dev.com.pem --ssl-keyfile oseh-dev.com-key.pem
+node --experimental-loader ts-node/esm src/index.ts --host 192.168.1.23 --port 2999 --ssl-certfile oseh-dev.com.pem --ssl-keyfile oseh-dev.com-key.pem
 ```
 
 Typically, requests would then be served at
@@ -45,4 +45,4 @@ appropriate self-signed certificates and DNS remapping.
 
 ## License
 
-2023 Oseh Inc, All Rights Reserved
+2024 Oseh Inc, All Rights Reserved

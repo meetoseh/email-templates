@@ -48,14 +48,11 @@ const acceptable: AcceptMediaRangeWithoutWeight[] = [
  */
 export const constructOpenapiSchemaRoute = (): Route => {
   deleteSchemaSync();
-  spawn(
-    'npx ts-node --experimental-specifier-resolution=node --esm src/index.ts --regenerate-schema',
-    {
-      shell: true,
-      detached: false,
-      env: process.env,
-    }
-  );
+  spawn('node --experimental-loader ts-node/esm src/index.ts --regenerate-schema', {
+    shell: true,
+    detached: false,
+    env: process.env,
+  });
 
   return {
     methods: ['GET'],
