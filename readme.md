@@ -42,7 +42,3 @@ node --experimental-loader ts-node/esm src/index.ts --host 192.168.1.23 --port 2
 Typically, requests would then be served at
 [oseh-dev.com:2999](https://oseh-dev.com:2999), assuming you are injecting the
 appropriate self-signed certificates and DNS remapping.
-
-## License
-
-2024 Oseh Inc, All Rights Reserved
